@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		36AB89ED1BE4DD61003C0E5B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89EC1BE4DD61003C0E5B /* main.c */; };
+		36AB89F41BE4DDDB003C0E5B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F31BE4DDDB003C0E5B /* main.c */; };
+		36AB89FB1BE4DDFB003C0E5B /* imageFilters.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F51BE4DDFB003C0E5B /* imageFilters.c */; };
+		36AB89FC1BE4DDFB003C0E5B /* imageOperations.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F71BE4DDFB003C0E5B /* imageOperations.c */; };
+		36AB89FD1BE4DDFB003C0E5B /* imageUtilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +27,13 @@
 
 /* Begin PBXFileReference section */
 		36AB89E91BE4DD61003C0E5B /* EdgeFilters */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EdgeFilters; sourceTree = BUILT_PRODUCTS_DIR; };
-		36AB89EC1BE4DD61003C0E5B /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		36AB89F31BE4DDDB003C0E5B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		36AB89F51BE4DDFB003C0E5B /* imageFilters.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageFilters.c; sourceTree = "<group>"; };
+		36AB89F61BE4DDFB003C0E5B /* imageFilters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageFilters.h; sourceTree = "<group>"; };
+		36AB89F71BE4DDFB003C0E5B /* imageOperations.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageOperations.c; sourceTree = "<group>"; };
+		36AB89F81BE4DDFB003C0E5B /* imageOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageOperations.h; sourceTree = "<group>"; };
+		36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageUtilities.c; sourceTree = "<group>"; };
+		36AB89FA1BE4DDFB003C0E5B /* imageUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageUtilities.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +66,13 @@
 		36AB89EB1BE4DD61003C0E5B /* EdgeFilters */ = {
 			isa = PBXGroup;
 			children = (
-				36AB89EC1BE4DD61003C0E5B /* main.c */,
+				36AB89F51BE4DDFB003C0E5B /* imageFilters.c */,
+				36AB89F61BE4DDFB003C0E5B /* imageFilters.h */,
+				36AB89F71BE4DDFB003C0E5B /* imageOperations.c */,
+				36AB89F81BE4DDFB003C0E5B /* imageOperations.h */,
+				36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */,
+				36AB89FA1BE4DDFB003C0E5B /* imageUtilities.h */,
+				36AB89F31BE4DDDB003C0E5B /* main.c */,
 			);
 			path = EdgeFilters;
 			sourceTree = "<group>";
@@ -118,7 +133,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				36AB89ED1BE4DD61003C0E5B /* main.c in Sources */,
+				36AB89FD1BE4DDFB003C0E5B /* imageUtilities.c in Sources */,
+				36AB89F41BE4DDDB003C0E5B /* main.c in Sources */,
+				36AB89FB1BE4DDFB003C0E5B /* imageFilters.c in Sources */,
+				36AB89FC1BE4DDFB003C0E5B /* imageOperations.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
