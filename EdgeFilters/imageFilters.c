@@ -126,3 +126,44 @@ Filter* sobelYFilter()
     return genericFilter(sobel,3,3);
 }
 
+//--------------------------------------------------------//
+//------------------   Gauss 1D Filter   -----------------//
+//--------------------------------------------------------//
+Filter* gauss1DFilter(double sigma, int dim, Filter *filter)
+{
+    double gc = M_2_SQRTPI*M_SQRT1_2/(2*sigma);
+    double sigma2 = sigma*sigma;
+    
+    if (dim == 0)
+        dim = (int)(2*sigma)*2+1;
+    
+    int halfDim = dim/2;
+    
+    int x=-halfDim;
+    for (int i=0; i<dim; i++) {
+        filter->kernel[i] = gc*exp(-x*x/sigma2);
+        x++;
+    }
+    
+    return filter;
+}
+
+//--------------------------------------------------------//
+//------------------   Gauss 1D X Filter   ---------------//
+//--------------------------------------------------------//
+Filter* gauss1DXFilter(double sigma, int width)
+{
+    Filter* filter = newFilter(width,1);
+    
+    return gauss1DFilter(sigma, width, filter);
+}
+
+//--------------------------------------------------------//
+//------------------   Gauss 1D Y Filter   ---------------//
+//--------------------------------------------------------//
+Filter* gauss1DYFilter(double sigma, int height)
+{
+    Filter* filter = newFilter(1,height);
+    
+    return gauss1DFilter(sigma, height, filter);
+}

@@ -48,4 +48,7 @@ Filter* prewittYFilter();
 Filter* sobelXFilter();
 Filter* sobelYFilter();
 
+Filter* gauss1DXFilter(double sigma, int width);
+Filter* gauss1DYFilter(double sigma, int height);
+
 #endif /* imageFilters_h */

@@ -136,9 +136,9 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 }
 
 //--------------------------------------------------------//
-//---------------- Apply a convolution -------------------//
+//--------------- Apply a 2D convolution -----------------//
 //--------------------------------------------------------//
-int convolutionPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
     if(!pgmIn || !pgmOut)
     {
@@ -199,6 +199,127 @@ int convolutionPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     return 0;
 }
 
+//--------------------------------------------------------//
+//--------------- Apply a 1D X convolution ---------------//
+//--------------------------------------------------------//
+int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+{
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+
+    double sum;
+    int pixelVal;
+    int topVal = 0;
+    
+    int ix;  // the index in the filter
+    int ic; // the index of the central pixel in the source image
+    int il; // the index of the pixel used in the integration
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    int filterWidth = filter->width;
+    int halfFilterWidth = filterWidth/2;
+    
+    // Move to the first useful interior pixel
+    ic = halfFilterWidth;
+    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    
+    // Loop over all internal source image pixels
+    for (int row = 0; row < height; row++) {
+        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
+        for (int col = halfFilterWidth; col < width-halfFilterWidth; col++) {
+            // compute the initial neighoboring pixel index to use in the convolution
+            il = ic-halfFilterWidth;
+            sum = 0;
+            ix = 0;
+            
+            // Iterate over all filter pixels
+            D(fprintf(stderr,"il=%d\n", il));
+            for (int l=0; l < filterWidth; l++)
+                sum += pgmIn->pixels[il++]*filter->kernel[ix++];
+            
+            // output the value of the convolution in the destination image
+            pixelVal = (int)floor(sum);
+            pgmOut->pixels[ic++] = pixelVal;
+            if (pixelVal > topVal)
+                topVal = pixelVal;
+        }
+        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
+        // move the index of the central pixel to the next row
+        ic += halfFilterWidth*2;
+    }
+    
+    pgmOut->max_val = topVal;
+
+    return 0;
+}
+
+//--------------------------------------------------------//
+//--------------- Apply a 1D Y convolution ---------------//
+//--------------------------------------------------------//
+int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+{
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    double sum;
+    int pixelVal;
+    int topVal = 0;
+    
+    int ix;  // the index in the filter
+    int ic; // the index of the central pixel in the source image
+    int il; // the index of the pixel used in the integration
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    int filterHeight = filter->height;
+    
+    int halfFilterHeight = filterHeight/2;
+    int rowShift = halfFilterHeight*width;
+    
+    // Move to the first useful interior pixel
+    ic = rowShift;
+    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    
+    // Loop over all internal source image pixels
+    for (int row = halfFilterHeight; row < height-halfFilterHeight; row++) {
+        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
+        for (int col = 0; col < width; col++) {
+            // compute the initial neighoboring pixel index to use in the convolution
+            il = ic-rowShift;
+            sum = 0;
+            ix = 0;
+            // Iterate over all filter pixels
+            for (int k=0; k < filterHeight; k++) {
+                D(fprintf(stderr,"k=%d,il=%d\n", k, il));
+                sum += pgmIn->pixels[il]*filter->kernel[ix++];
+                // move the index of the neighboring pixel to the next row
+                il += rowShift;
+            }
+            // output the value of the convolution in the destination image
+            pixelVal = (int)floor(sum);
+            pgmOut->pixels[ic++] = pixelVal;
+            if (pixelVal > topVal)
+                topVal = pixelVal;
+        }
+        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
+    }
+    
+    pgmOut->max_val = topVal;
+    return 0;
+}
+
+//--------------------------------------------------------//
+//------------------ Add uniform noise -------------------//
+//--------------------------------------------------------//
 int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
 {
     int pixelVal;
@@ -226,6 +347,9 @@ int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
     return 0;
 }
 
+//--------------------------------------------------------//
+//--------------- Add salt & pepper noise ----------------//
+//--------------------------------------------------------//
 int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
 {
     if(!pgmIn || !pgmOut)

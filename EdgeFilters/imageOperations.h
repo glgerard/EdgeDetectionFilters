@@ -28,7 +28,8 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut);
 //---------------------------------------------------------//
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
-int convolutionPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 
 //---------------------------------------------------------//
 //--------------- Noise  operations for PGM ---------------//
