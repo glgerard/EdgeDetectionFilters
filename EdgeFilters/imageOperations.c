@@ -167,6 +167,7 @@ int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     // Move to the first useful interior pixel
     ic = rowShift+halfFilterWidth;
     D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    D(fprintf(stderr,"wf=%d,hf=%d\n",filterWidth,filterHeight));
     
     // Loop over all internal source image pixels
     for (int row = halfFilterHeight; row < height-halfFilterHeight; row++) {
@@ -174,15 +175,15 @@ int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
         for (int col = halfFilterWidth; col < width-halfFilterWidth; col++) {
             // compute the initial neighoboring pixel index to use in the convolution
             il = ic-rowShift-halfFilterWidth;
+            D(fprintf(stderr,"(%d,%d),ic=%d,il=%d\n", row, col, ic, il));
             sum = 0;
             ix = 0;
             // Iterate over all filter pixels
             for (int k=0; k < filterHeight; k++) {
-                D(fprintf(stderr,"k=%d,il=%d\n", k, il));
                 for (int l=0; l < filterWidth; l++)
                     sum += pgmIn->pixels[il++]*filter->kernel[ix++];
                 // move the index of the neighboring pixel to the next row
-                il += rowShift-filterWidth;
+                il += width-filterWidth;
             }
             // output the value of the convolution in the destination image
             pixelVal = (int)floor(sum);
@@ -214,7 +215,7 @@ int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     int pixelVal;
     int topVal = 0;
     
-    int ix;  // the index in the filter
+    int ix; // the index in the filter
     int ic; // the index of the central pixel in the source image
     int il; // the index of the pixel used in the integration
     
@@ -302,7 +303,7 @@ int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
                 D(fprintf(stderr,"k=%d,il=%d\n", k, il));
                 sum += pgmIn->pixels[il]*filter->kernel[ix++];
                 // move the index of the neighboring pixel to the next row
-                il += rowShift;
+                il += width;
             }
             // output the value of the convolution in the destination image
             pixelVal = (int)floor(sum);

@@ -14,14 +14,6 @@
 #include <math.h>
 #include "imageUtilities.h"
 
-//#define __DEBUG__
-
-#ifdef __DEBUG__
-#define D(a) a
-#else
-#define D(a)
-#endif
-
 typedef struct
 {
     int width;
@@ -35,6 +27,7 @@ typedef struct
 
 Filter* newFilter(int width, int height);
 void freeFilter(Filter** filter);
+void printFilter(Filter* filter);
 
 Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2);
 

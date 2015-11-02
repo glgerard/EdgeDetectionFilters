@@ -174,17 +174,20 @@ int writePGM(Pgm* pgm, char* filename)
 	FILE *fp = fopen(filename, "w");
 	fprintf(fp, "P2\n%d %d\n%d\n", pgm->width, pgm->height, pgm->max_val);
 	
-	int i;
+	int i,j;
+    int l=0;
 	int width = pgm->width;
 	int height = pgm->height;
 	
 	// Write image
-	for(i=0; i<width*height; i++)
-	{
-		fprintf(fp, "%d\n", pgm->pixels[i]);
-	}	
-	
-	printf("\nImage correctly writed\n");
+    for(i=0; i<height; i++) {
+        for (j=0; j<width; j++) {
+            fprintf(fp, "%d ", pgm->pixels[l++]);
+        }
+        fprintf(fp, "\n");
+	}
+
+	printf("\nImage \"%s\" correctly writed\n", filename);
 	
 	// Ok close the file
 	fclose(fp);

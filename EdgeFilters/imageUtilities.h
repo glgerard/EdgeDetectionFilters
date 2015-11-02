@@ -7,6 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define __DEBUG__
+
+#ifdef __DEBUG__
+#define D(a) a
+#else
+#define D(a)
+#endif
+
 typedef struct 
 {
   int width;

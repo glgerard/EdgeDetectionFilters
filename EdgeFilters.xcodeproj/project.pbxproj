@@ -11,6 +11,7 @@
 		36AB89FB1BE4DDFB003C0E5B /* imageFilters.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F51BE4DDFB003C0E5B /* imageFilters.c */; };
 		36AB89FC1BE4DDFB003C0E5B /* imageOperations.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F71BE4DDFB003C0E5B /* imageOperations.c */; };
 		36AB89FD1BE4DDFB003C0E5B /* imageUtilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */; };
+		36AB8A011BE7D161003C0E5B /* test.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89FF1BE7D161003C0E5B /* test.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +35,8 @@
 		36AB89F81BE4DDFB003C0E5B /* imageOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageOperations.h; sourceTree = "<group>"; };
 		36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageUtilities.c; sourceTree = "<group>"; };
 		36AB89FA1BE4DDFB003C0E5B /* imageUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageUtilities.h; sourceTree = "<group>"; };
+		36AB89FF1BE7D161003C0E5B /* test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test.c; sourceTree = "<group>"; };
+		36AB8A001BE7D161003C0E5B /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +76,8 @@
 				36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */,
 				36AB89FA1BE4DDFB003C0E5B /* imageUtilities.h */,
 				36AB89F31BE4DDDB003C0E5B /* main.c */,
+				36AB89FF1BE7D161003C0E5B /* test.c */,
+				36AB8A001BE7D161003C0E5B /* test.h */,
 			);
 			path = EdgeFilters;
 			sourceTree = "<group>";
@@ -133,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36AB8A011BE7D161003C0E5B /* test.c in Sources */,
 				36AB89FD1BE4DDFB003C0E5B /* imageUtilities.c in Sources */,
 				36AB89F41BE4DDDB003C0E5B /* main.c in Sources */,
 				36AB89FB1BE4DDFB003C0E5B /* imageFilters.c in Sources */,
@@ -255,6 +261,7 @@
 				36AB89F21BE4DD61003C0E5B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

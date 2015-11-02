@@ -30,6 +30,7 @@ int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 
 //---------------------------------------------------------//
 //--------------- Noise  operations for PGM ---------------//
