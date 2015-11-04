@@ -224,3 +224,27 @@ int testGauss(Pgm* imgIn, char* outputFile)
     
     return 0;
 }
+
+int testDoG(Pgm* imgIn, char* outputFile)
+{
+    char pname[MAXBUF];
+    Filter* filter;
+
+    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+
+    filter = DoGFilter(6, 0);
+    printFilter(filter);
+    
+    convolution2DPGM(imgIn, imgOut, filter);
+    normalizePGM(imgOut, imgOut1);
+    
+    sprintf(pname,"%s_dog_6.pgm", outputFile);
+    writePGM(imgOut1, pname);
+    
+    freeFilter(&filter);
+    freePGM(&imgOut);
+    freePGM(&imgOut1);
+    
+    return 0;
+}

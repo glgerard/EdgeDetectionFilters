@@ -363,7 +363,7 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
     int height = pgmIn->height;
     
     for (int i = 0; i < width*height; i++) {
-        if (drandom()>density) {
+        if (drandom()<density) {
             pgmOut->pixels[i] = pgmIn->pixels[i];
         } else {
             if (random()&01) {

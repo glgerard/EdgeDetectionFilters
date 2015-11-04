@@ -43,5 +43,7 @@ Filter* sobelYFilter();
 
 Filter* gauss1DXFilter(double sigma, int width);
 Filter* gauss1DYFilter(double sigma, int height);
+Filter* gauss2DFilter(double sigma, int dim);
+Filter* DoGFilter(double sigma, int dim);
 
 #endif /* imageFilters_h */

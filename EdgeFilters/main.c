@@ -89,13 +89,16 @@ int main(int argc, char** argv)
     writePGM(imgOut,pname);
 
     // testSharpening
-    testSharpening(imgIn, outputFile);
+    // testSharpening(imgIn, outputFile);
     
     // test Sobel
     // testSobel(imgIn, outputFile);
 
     // test Gauss filter
     // testGauss(imgIn, outputFile);
+    
+    // test DoG filter
+    testDoG(imgIn, outputFile);
     
     // calculate histogram and write it in a file
     // calcHist(imgIn);

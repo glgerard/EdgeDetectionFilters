@@ -114,8 +114,8 @@ Filter* genericFilter(const int* matrix, int width, int height) {
 //--------------------------------------------------------//
 Filter* prewittXFilter()
 {
-    const int sobel[] = {1,1,1,0,0,0,-1,-1,-1};
-    return genericFilter(sobel,3,3);
+    const int prewitt[] = {1,1,1,0,0,0,-1,-1,-1};
+    return genericFilter(prewitt,3,3);
 }
 
 //--------------------------------------------------------//
@@ -123,8 +123,8 @@ Filter* prewittXFilter()
 //--------------------------------------------------------//
 Filter* prewittYFilter()
 {
-    const int sobel[] = {1,0,-1,1,0,-1,1,0,-1};
-    return genericFilter(sobel,3,3);
+    const int prewitt[] = {1,0,-1,1,0,-1,1,0,-1};
+    return genericFilter(prewitt,3,3);
 }
 
 //--------------------------------------------------------//
@@ -189,3 +189,48 @@ Filter* gauss1DYFilter(double sigma, int height)
     
     return gauss1DFilter(sigma, height, filter);
 }
+
+
+//--------------------------------------------------------//
+//------------------   Gauss 2D Filter   -----------------//
+//--------------------------------------------------------//
+Filter* gauss2DFilter(double sigma, int dim)
+{
+    double gc;
+    double sigma2 = sigma*sigma;
+    double gc0 = M_1_PI/(2*sigma2);
+
+    if (dim == 0)
+        dim = (int)(2*sigma)*2+1;
+    
+    Filter* filter = newFilter(dim,dim);
+
+    int halfDim = dim/2;
+    
+    int il = 0;
+    for (int x=-halfDim; x<=halfDim; x++) {
+        gc = gc0*exp(-x*x/sigma2);
+        for (int y=-halfDim; y<=halfDim; y++)
+            filter->kernel[il++] = gc*exp(-y*y/sigma2);
+    }
+    
+    return filter;
+}
+
+//--------------------------------------------------------//
+//-------------------     DoG Filter   -------------------//
+//--------------------------------------------------------//
+Filter* DoGFilter(double sigma, int dim)
+{
+    double sigmaExt = sigma;
+    double sigmaInt = sigma/1.66;
+    
+    Filter *gaussExtFilter = gauss2DFilter(sigmaExt, dim);
+    Filter *gaussIntFilter = gauss2DFilter(sigmaInt, dim);
+    
+    Filter *filter = linearAddFilter(gaussExtFilter, gaussIntFilter, 1.0, -1.0);
+    
+    return filter;
+}
+
+
