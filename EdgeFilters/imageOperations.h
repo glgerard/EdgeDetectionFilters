@@ -20,7 +20,7 @@
 //------------- Basic image operations for PGM ------------//
 //---------------------------------------------------------//
 int absolutePGM(Pgm* pgmIn, Pgm* pgmOut);
-int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut);
+int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold);
 int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut);
 
 //---------------------------------------------------------//
@@ -31,6 +31,8 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut);
+int contourN8PGM(Pgm* pgmIn, Pgm* pgmOut);
 
 //---------------------------------------------------------//
 //--------------- Noise  operations for PGM ---------------//

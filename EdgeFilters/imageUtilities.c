@@ -215,6 +215,8 @@ int invertPGM(Pgm* pgmIn, Pgm* pgmOut)
 	int max = pgmIn->max_val;
 	int width = pgmIn->width;
 	int height = pgmIn->height;
+    
+    pgmOut->max_val = max;
 		
 	// Writing Pixels
 	for(i=0; i<width*height; i++)

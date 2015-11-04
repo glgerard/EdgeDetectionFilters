@@ -150,7 +150,7 @@ int testSobel(Pgm* imgIn, char* outputFile)
     resetPGM(imgOut);
     modulePGM(imgOut1, imgOut2, imgOut);
     resetPGM(imgOut3);
-    thresholdPGM(imgOut, imgOut3);
+    thresholdPGM(imgOut, imgOut3, 255);
     resetPGM(imgOut);
     normalizePGM(imgOut3, imgOut);
     
@@ -237,7 +237,11 @@ int testDoG(Pgm* imgIn, char* outputFile)
     printFilter(filter);
     
     convolution2DPGM(imgIn, imgOut, filter);
-    normalizePGM(imgOut, imgOut1);
+    thresholdPGM(imgOut, imgOut1, 0);
+    resetPGM(imgOut);
+    invertPGM(imgOut1, imgOut);
+    resetPGM(imgOut1);
+    contourN8PGM(imgOut, imgOut1);
     
     sprintf(pname,"%s_dog_6.pgm", outputFile);
     writePGM(imgOut1, pname);

@@ -33,7 +33,7 @@ int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
 //--------------------------------------------------------//
 //-------------- Threshold of an Image -------------------//
 //--------------------------------------------------------//
-int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut)
+int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
 {
     if(!pgmIn | !pgmOut)
     {
@@ -43,12 +43,22 @@ int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut)
     
     int pixelVal;
     
+    if (threshold > 255) {
+        threshold = 255;
+    }
+    
+    if (threshold < 0) {
+        threshold = 0;
+    }
+    
     int width = pgmIn->width;
     int height = pgmIn->height;
     
+    pgmOut->max_val = 255;
+    
     for (int i = 0; i < width*height; i++) {
         pixelVal = pgmIn->pixels[i];
-        if (pixelVal>255) {
+        if (pixelVal>threshold) {
             pixelVal=255;
         }
         if (pixelVal<0) {
@@ -197,6 +207,146 @@ int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     }
     
     pgmOut->max_val = topVal;
+    return 0;
+}
+
+//--------------------------------------------------------//
+//------------ Apply a simple contour check --------------//
+//--------------------------------------------------------//
+int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut)
+{
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    double sum;
+    int pixelVal;
+    
+    int ix;  // the index in the filter
+    int ic; // the index of the central pixel in the source image
+    int il; // the index of the pixel used in the integration
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    int filterWidth = 3;
+    int filterHeight = 3;
+    
+    int halfFilterHeight = filterHeight/2;
+    int rowShift = halfFilterHeight*width;
+    int halfFilterWidth = filterWidth/2;
+    
+    // Move to the first useful interior pixel
+    ic = rowShift+halfFilterWidth;
+    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    D(fprintf(stderr,"wf=%d,hf=%d\n",filterWidth,filterHeight));
+    
+    // Loop over all internal source image pixels
+    for (int row = halfFilterHeight; row < height-halfFilterHeight; row++) {
+        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
+        for (int col = halfFilterWidth; col < width-halfFilterWidth; col++) {
+            // compute the initial neighoboring pixel index to use in the convolution
+            il = ic-rowShift-halfFilterWidth;
+            D(fprintf(stderr,"(%d,%d),ic=%d,il=%d\n", row, col, ic, il));
+            sum = 0;
+            ix = 0;
+            // Iterate over all filter pixels
+            for (int k=0; k < filterHeight; k++) {
+                for (int l=0; l < filterWidth; l++)
+                    sum += pgmIn->pixels[il++];
+                // move the index of the neighboring pixel to the next row
+                il += width-filterWidth;
+            }
+            pixelVal = 255;
+            if (sum > 0 && sum < 255*9) {
+                pixelVal = 0;
+            }
+            
+            pgmOut->pixels[ic++] = pixelVal;
+
+        }
+        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
+        // move the index of the central pixel to the next row
+        ic += halfFilterWidth*2;
+    }
+    
+    pgmOut->max_val = 255;
+    return 0;
+}
+
+//--------------------------------------------------------//
+//------------ Apply a N8 contour check --------------//
+//--------------------------------------------------------//
+int contourN8PGM(Pgm* pgmIn, Pgm* pgmOut)
+{
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int dist;
+    int max_dist;
+    int pixelVal;
+    
+    int ix;  // the index in the filter
+    int ic; // the index of the central pixel in the source image
+    int il; // the index of the pixel used in the integration
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    int filterWidth = 3;
+    int filterHeight = 3;
+    
+    int halfFilterHeight = filterHeight/2;
+    int rowShift = halfFilterHeight*width;
+    int halfFilterWidth = filterWidth/2;
+    
+    // Move to the first useful interior pixel
+    ic = rowShift+halfFilterWidth;
+    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    D(fprintf(stderr,"wf=%d,hf=%d\n",filterWidth,filterHeight));
+    
+    // Loop over all internal source image pixels
+    for (int row = halfFilterHeight; row < height-halfFilterHeight; row++) {
+        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
+        for (int col = halfFilterWidth; col < width-halfFilterWidth; col++) {
+            pixelVal = 255;
+            if (pgmIn->pixels[ic] == 255) {
+                // compute the initial neighoboring pixel index to use in the convolution
+                il = ic-rowShift-halfFilterWidth;
+                D(fprintf(stderr,"(%d,%d),ic=%d,il=%d\n", row, col, ic, il));
+                max_dist = 0;
+                ix = 0;
+                // Iterate over all filter pixels
+                dist = 0;
+                for (int h=-halfFilterHeight; h <= halfFilterHeight; h++) {
+                    for (int k=-halfFilterWidth; k <= halfFilterWidth; k++) {
+                        if (pgmIn->pixels[il++] == 0) {
+                            dist = abs(h)+abs(k);
+                        }
+                        if (dist > max_dist) {
+                            max_dist = dist;
+                        }
+                    }
+                    // move the index of the neighboring pixel to the next row
+                    il += width-filterWidth;
+                }
+                if (max_dist >= 1) {
+                    pixelVal = 0;
+                }
+            }
+            pgmOut->pixels[ic++] = pixelVal;
+        }
+        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
+        // move the index of the central pixel to the next row
+        ic += halfFilterWidth*2;
+    }
+    
+    pgmOut->max_val = 255;
     return 0;
 }
 
