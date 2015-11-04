@@ -234,14 +234,17 @@ int testDoG(Pgm* imgIn, char* outputFile)
     Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
 
     filter = DoGFilter(6, 0);
-    printFilter(filter);
+    // printFilter(filter);
     
     convolution2DPGM(imgIn, imgOut, filter);
     thresholdPGM(imgOut, imgOut1, 0);
     resetPGM(imgOut);
     invertPGM(imgOut1, imgOut);
+    sprintf(pname,"%s_dog_6_thr.pgm", outputFile);
+    writePGM(imgOut, pname);
+    
     resetPGM(imgOut1);
-    contourN8PGM(imgOut, imgOut1);
+    contourN8IntPGM(imgOut, imgOut1);
     
     sprintf(pname,"%s_dog_6.pgm", outputFile);
     writePGM(imgOut1, pname);

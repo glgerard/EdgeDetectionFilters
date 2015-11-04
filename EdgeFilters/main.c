@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     // testSharpening(imgIn, outputFile);
     
     // test Sobel
-    // testSobel(imgIn, outputFile);
+    testSobel(imgIn, outputFile);
 
     // test Gauss filter
     // testGauss(imgIn, outputFile);

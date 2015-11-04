@@ -187,7 +187,7 @@ int writePGM(Pgm* pgm, char* filename)
         fprintf(fp, "\n");
 	}
 
-	printf("\nImage \"%s\" correctly writed\n", filename);
+	printf("\nImage \"%s\" correctly written.\n", filename);
 	
 	// Ok close the file
 	fclose(fp);

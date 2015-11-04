@@ -32,7 +32,7 @@ int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut);
-int contourN8PGM(Pgm* pgmIn, Pgm* pgmOut);
+int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut);
 
 //---------------------------------------------------------//
 //--------------- Noise  operations for PGM ---------------//
