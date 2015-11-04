@@ -255,3 +255,34 @@ int testDoG(Pgm* imgIn, char* outputFile)
     
     return 0;
 }
+
+int testDenoise(Pgm* imgIn, char* outputFile)
+{
+    char pname[MAXBUF];
+    
+    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    
+    // apply a box filter to compute the average
+    Filter *filter = boxFilter(3,3);
+    convolution2DPGM(imgIn, imgOut, filter);
+    freeFilter(&filter);
+
+    normalizePGM(imgOut, imgOut1);
+    sprintf(pname,"%s_average.pgm", outputFile);
+    writePGM(imgOut1,pname);
+    
+    resetPGM(imgOut);
+    resetPGM(imgOut1);
+    
+    // apply a median filter
+    medianPGM(imgIn, imgOut);
+    normalizePGM(imgOut, imgOut1);
+    sprintf(pname,"%s_median.pgm", outputFile);
+    writePGM(imgOut1,pname);
+    
+    freePGM(&imgOut);
+    freePGM(&imgOut1);
+    
+    return 0;
+}

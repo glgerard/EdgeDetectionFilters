@@ -148,7 +148,6 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 //--------------------------------------------------------//
 //----------- Scan a PGM and apply a function ------------//
 //--------------------------------------------------------//
-
 int scanPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
             int (*func)(Pgm*, double*, int, int, int))
 {
@@ -243,7 +242,7 @@ int contour2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic
         for (int l=-borderX; l <= borderX; l++)
             sum += pgmIn->pixels[il+l];
 
-    if (sum > 0 && sum < 255*borderX*borderY) {
+    if (sum > 0 && sum < 255*(2*borderX+1)*(2*borderY+1)) {
         pixelVal = 0;
     }
     return pixelVal;
@@ -296,6 +295,60 @@ int contourN8IntKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int
 int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
 {
     return scanPGM(pgmIn, pgmOut, NULL, 1, 1, contourN8IntKernel);
+}
+
+//--------------------------------------------------------//
+//---------------------- Bubble Sort ---------------------//
+//--------------------------------------------------------//
+int* sort(int* array, int len)
+{
+    int temp;
+    int swap = TRUE;
+    
+    while (swap) {
+        swap = FALSE;
+        for (int i=0; i<len; i++) {
+            if (array[i] > array[i+1]) {
+                temp = array[i];
+                array[i] = array[i+1];
+                array[i+1] = temp;
+                swap = TRUE;
+            }
+        }
+    }
+    return array;
+}
+
+//--------------------------------------------------------//
+//---------- Compute an image submatrix median -----------//
+//--------------------------------------------------------//
+int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+{
+    int* pixelVals;
+    int ix = 0;
+    
+    pixelVals = calloc((2*borderX+1)*(2*borderY+1), sizeof(double));
+    
+    int width = pgmIn->width;
+    
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++)
+            pixelVals[ix++] = pgmIn->pixels[il+l];
+    
+    int nPixels = ix;
+    
+    pixelVals = sort(pixelVals, nPixels);
+    
+    return pixelVals[nPixels/2];
+}
+
+//--------------------------------------------------------//
+//--------------    Apply a median filter    -------------//
+//--------------------------------------------------------//
+int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
+{
+    return scanPGM(pgmIn, pgmOut, NULL, 1, 1, medianKernel);
 }
 
 //--------------------------------------------------------//

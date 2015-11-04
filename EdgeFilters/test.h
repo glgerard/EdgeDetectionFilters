@@ -17,5 +17,6 @@ int testSharpening(Pgm* imgIn, char* outputFile);
 int testSobel(Pgm* imgIn, char* outputFile);
 int testGauss(Pgm* imgIn, char* outputFile);
 int testDoG(Pgm* imgIn, char* outputFile);
+int testDenoise(Pgm* imgIn, char* outputFile);
 
 #endif /* test_h */

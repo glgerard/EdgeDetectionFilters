@@ -92,13 +92,16 @@ int main(int argc, char** argv)
     // testSharpening(imgIn, outputFile);
     
     // test Sobel
-    testSobel(imgIn, outputFile);
+    // testSobel(imgIn, outputFile);
 
     // test Gauss filter
     // testGauss(imgIn, outputFile);
     
     // test DoG filter
-    testDoG(imgIn, outputFile);
+    // testDoG(imgIn, outputFile);
+    
+    // test denoise filters
+    testDenoise(imgIn, outputFile);
     
     // calculate histogram and write it in a file
     // calcHist(imgIn);

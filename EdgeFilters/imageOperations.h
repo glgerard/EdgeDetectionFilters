@@ -14,6 +14,9 @@
 #include "imageUtilities.h"
 #include "imageFilters.h"
 
+#define TRUE 1
+#define FALSE 0
+
 #define drandom() (((double)(random()&0xffffff))/0xffffff)
 
 //---------------------------------------------------------//
@@ -26,6 +29,7 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut);
 //---------------------------------------------------------//
 //----------- Advanced image operations for PGM -----------//
 //---------------------------------------------------------//
+int medianPGM(Pgm *pgmIn, Pgm* pgmOut);
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
