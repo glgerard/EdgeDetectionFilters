@@ -1,6 +1,6 @@
 //
 //  imageFilters.h
-//  ImageCV
+//  EdgeFilters
 //
 //  Created by Gianluca Gerard on 24/10/15.
 //  Copyright © 2015 Gianluca Gerard. All rights reserved.
@@ -9,6 +9,9 @@
 #ifndef imageFilters_h
 #define imageFilters_h
 
+//---------------------------------------------------------//
+//------------------ Standard includes --------------------//
+//---------------------------------------------------------//
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -45,5 +48,12 @@ Filter* gauss1DXFilter(double sigma, int width);
 Filter* gauss1DYFilter(double sigma, int height);
 Filter* gauss2DFilter(double sigma, int dim);
 Filter* DoGFilter(double sigma, int dim);
+
+//---------------------------------------------------------//
+//---------------------   Filters Ops   -------------------//
+//---------------------------------------------------------//
+int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 
 #endif /* imageFilters_h */

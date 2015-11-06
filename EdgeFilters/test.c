@@ -149,10 +149,13 @@ int testSobel(Pgm* imgIn, char* outputFile)
     // applied sobel filters
     resetPGM(imgOut);
     modulePGM(imgOut1, imgOut2, imgOut);
-    resetPGM(imgOut3);
-    thresholdPGM(imgOut, imgOut3, 255);
+    normalizePGM(imgOut, imgOut3);
+
+    sprintf(pname,"%s_sobel_mod.pgm", outputFile);
+    writePGM(imgOut3,pname);
+    
     resetPGM(imgOut);
-    normalizePGM(imgOut3, imgOut);
+    thresholdPGM(imgOut3, imgOut, 255);
     
     sprintf(pname,"%s_sobel_mod_T.pgm", outputFile);
     writePGM(imgOut,pname);
@@ -256,6 +259,32 @@ int testDoG(Pgm* imgIn, char* outputFile)
     return 0;
 }
 
+int testNoise(Pgm *imgIn, char* outputFile)
+{
+    char pname[MAXBUF];
+
+    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+
+    // apply Uniform noise
+    addUniformNoisePGM(imgIn, imgOut, 32);
+    normalizePGM(imgOut, imgOut1);
+    sprintf(pname,"%s_uninoise.pgm", outputFile);
+    writePGM(imgOut1,pname);
+    resetPGM(imgOut);
+    resetPGM(imgOut1);
+    
+    // apply Salt & Pepper noise
+    addSaltPepperNoisePGM(imgIn, imgOut, 0.05);
+    sprintf(pname,"%s_snp.pgm", outputFile);
+    writePGM(imgOut,pname);
+    
+    freePGM(&imgOut);
+    freePGM(&imgOut1);
+    
+    return 0;
+}
+
 int testDenoise(Pgm* imgIn, char* outputFile)
 {
     char pname[MAXBUF];
@@ -283,6 +312,44 @@ int testDenoise(Pgm* imgIn, char* outputFile)
     
     freePGM(&imgOut);
     freePGM(&imgOut1);
+    
+    return 0;
+}
+
+int testOP39(Pgm* imgIn, char* outputFile)
+{
+    char pname[MAXBUF];
+    
+    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+
+    op39PGM(imgIn, imgOut);
+    
+    sprintf(pname,"%s_op39.pgm", outputFile);
+    writePGM(imgOut,pname);
+    
+    thresholdPGM(imgOut, imgOut1, 30);
+    sprintf(pname,"%s_op39_T.pgm", outputFile);
+    writePGM(imgOut1,pname);
+    
+    freePGM(&imgOut);
+    freePGM(&imgOut1);
+    
+    return 0;
+}
+
+int testNagao(Pgm* imgIn, char* outputFile)
+{
+    char pname[MAXBUF];
+    
+    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    
+    nagaoPGM(imgIn, imgOut);
+    
+    sprintf(pname,"%s_nagao.pgm", outputFile);
+    writePGM(imgOut,pname);
+    
+    freePGM(&imgOut);
     
     return 0;
 }

@@ -1,13 +1,12 @@
 //
 //  imageOperations.c
-//  ImageCV
+//  EdgeFilters
 //
 //  Created by Gianluca Gerard on 25/10/15.
 //  Copyright © 2015 Gianluca Gerard. All rights reserved.
 //
 
 #include "imageOperations.h"
-
 
 //--------------------------------------------------------//
 //-------------- Absolute of an Image --------------------//
@@ -61,7 +60,7 @@ int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
         if (pixelVal>threshold) {
             pixelVal=255;
         }
-        if (pixelVal<0) {
+        if (pixelVal<threshold) {
             pixelVal=0;
         }
         pgmOut->pixels[i] = pixelVal;
@@ -106,6 +105,7 @@ int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
     }
     
     int pixelVal;
+    int topVal = 0;
     
     int width = pgmOpX->width;
     int height = pgmOpX->height;
@@ -114,7 +114,12 @@ int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
         pixelVal = (int)sqrt(pgmOpX->pixels[i]*pgmOpX->pixels[i] +
                              pgmOpY->pixels[i]*pgmOpY->pixels[i]);
         pgmOut->pixels[i] = pixelVal;
+        
+        if (pixelVal > topVal)
+            topVal = pixelVal;
     }
+    
+    pgmOut->max_val = topVal;
     
     return 0;
 }
@@ -132,6 +137,7 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
     
     int pixelVal;
     double phi;
+    int topVal = 0;
     
     int width = pgmOpX->width;
     int height = pgmOpX->height;
@@ -140,15 +146,85 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
         phi = fabs(atan2(pgmOpY->pixels[i], pgmOpX->pixels[i]))*M_1_PI*255;
         pixelVal = (int)phi;
         pgmOut->pixels[i] = pixelVal;
+        
+        if (pixelVal > topVal)
+            topVal = pixelVal;
     }
+    
+    pgmOut->max_val = topVal;
+
+    return 0;
+}
+
+//--------------------------------------------------------//
+//------------------ Add uniform noise -------------------//
+//--------------------------------------------------------//
+int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
+{
+    int randVal;
+    
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if (range < 0) {
+        range = -range;
+    }
+    
+    if (range > 127) {
+        range = 127;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    for (int i = 0; i < width*height; i++) {
+        randVal = random()%(2*range)-range;
+        pgmOut->pixels[i] = pgmIn->pixels[i] + randVal;
+    }
+    
+    pgmOut->max_val = pgmIn->max_val+range;
     
     return 0;
 }
 
 //--------------------------------------------------------//
-//----------- Scan a PGM and apply a function ------------//
+//--------------- Add salt & pepper noise ----------------//
 //--------------------------------------------------------//
-int scanPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
+int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
+{
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    for (int i = 0; i < width*height; i++) {
+        if (drandom()<density) {
+            pgmOut->pixels[i] = pgmIn->pixels[i];
+        } else {
+            if (random()&01) {
+                pgmOut->pixels[i] = 0;
+            } else {
+                pgmOut->pixels[i] = 255;
+            }
+        }
+    }
+    
+    pgmOut->max_val = 255;
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//--- Scan an image and apply a function to each pixel ---//
+//--------------------------------------------------------//
+int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
             int (*func)(Pgm*, double*, int, int, int))
 {
     if(!pgmIn || !pgmOut)
@@ -178,20 +254,19 @@ int scanPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
     D(fprintf(stderr,"bw=%d,bh=%d\n",borderX,borderY));
     
     // Loop over all internal source image pixels
-    for (int row = borderY; row < height-borderY; row++) {
+    for (int row = borderY; row < height-borderY; row++, ic += borderX*2) {
         D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = borderX; col < width-borderX; col++) {
+        for (int col = borderX; col < width-borderX; col++, ic++) {
             D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
             
             pixelVal = func(pgmIn, kernel, borderX, borderY, ic);
 
-            pgmOut->pixels[ic++] = pixelVal;
+            pgmOut->pixels[ic] = pixelVal;
             if (pixelVal > topVal)
                 topVal = pixelVal;
         }
         D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
         // move the index of the central pixel to the next row
-        ic += borderX*2;
     }
     
     pgmOut->max_val = topVal;
@@ -199,33 +274,6 @@ int scanPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
     return 0;
 }
 
-//--------------------------------------------------------//
-//----- Convolve an image submatrix with a filter --------//
-//--------------------------------------------------------//
-int convolution2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
-{
-    double sum = 0;
-    int ix = 0;
-    
-    int width = pgmIn->width;
-    
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
-            sum += pgmIn->pixels[il+l]*kernel[ix++];
-        // move the index of the neighboring pixel to the next row
-    // output the value of the convolution in the destination image
-    return (int)floor(sum);
-}
-
-//--------------------------------------------------------//
-//--------------- Apply a 2D convolution -----------------//
-//--------------------------------------------------------//
-
-int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
-{
-    return scanPGM(pgmIn, pgmOut, filter, 0, 0, convolution2DKernel);
-}
 
 //--------------------------------------------------------//
 //------ Check an eight neighbour for contour pixels -----//
@@ -253,7 +301,7 @@ int contour2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic
 //--------------------------------------------------------//
 int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut)
 {
-    return scanPGM(pgmIn, pgmOut, NULL, 1, 1, contour2DKernel);
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contour2DKernel);
 }
 
 //--------------------------------------------------------//
@@ -294,7 +342,7 @@ int contourN8IntKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int
 //--------------------------------------------------------//
 int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
 {
-    return scanPGM(pgmIn, pgmOut, NULL, 1, 1, contourN8IntKernel);
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contourN8IntKernel);
 }
 
 //--------------------------------------------------------//
@@ -327,7 +375,7 @@ int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
     int* pixelVals;
     int ix = 0;
     
-    pixelVals = calloc((2*borderX+1)*(2*borderY+1), sizeof(double));
+    pixelVals = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
     
     int width = pgmIn->width;
     
@@ -348,182 +396,208 @@ int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
 //--------------------------------------------------------//
 int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return scanPGM(pgmIn, pgmOut, NULL, 1, 1, medianKernel);
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, medianKernel);
+}
+
+int mod (int a, int b)
+{
+    int ret = a % b;
+    if(ret < 0)
+        ret+=b;
+    return ret;
 }
 
 //--------------------------------------------------------//
-//--------------- Apply a 1D X convolution ---------------//
+//-------------    Compute the 3/9 operator   ------------//
 //--------------------------------------------------------//
-int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
 {
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
+    int pixelVals[9];
+    int I[9];
+    int sum = 0;
 
-    double sum;
-    int pixelVal;
-    int topVal = 0;
-    
-    int ix; // the index in the filter
-    int ic; // the index of the central pixel in the source image
-    int il; // the index of the pixel used in the integration
+    borderX = 1;
+    borderY = 1;
     
     int width = pgmIn->width;
-    int height = pgmIn->height;
     
-    int filterWidth = filter->width;
-    int halfFilterWidth = filterWidth/2;
-    
-    // Move to the first useful interior pixel
-    ic = halfFilterWidth;
-    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
-    
-    // Loop over all internal source image pixels
-    for (int row = 0; row < height; row++) {
-        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = halfFilterWidth; col < width-halfFilterWidth; col++) {
-            // compute the initial neighoboring pixel index to use in the convolution
-            il = ic-halfFilterWidth;
-            sum = 0;
-            ix = 0;
-            
-            // Iterate over all filter pixels
-            D(fprintf(stderr,"il=%d\n", il));
-            for (int l=0; l < filterWidth; l++)
-                sum += pgmIn->pixels[il++]*filter->kernel[ix++];
-            
-            // output the value of the convolution in the destination image
-            pixelVal = (int)floor(sum);
-            pgmOut->pixels[ic++] = pixelVal;
-            if (pixelVal > topVal)
-                topVal = pixelVal;
+    int total = 0;
+    int ix = 0;
+
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++) {
+            pixelVals[ix] = pgmIn->pixels[il+l];
+            total += pixelVals[ix++];
         }
-        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
-        // move the index of the central pixel to the next row
-        ic += halfFilterWidth*2;
+    
+    if (total == 0)
+        return 0;
+    
+    // remapping
+    
+    I[0] = pixelVals[5];
+    I[1] = pixelVals[2];
+    I[2] = pixelVals[1];
+    I[3] = pixelVals[0];
+    I[4] = pixelVals[3];
+    I[5] = pixelVals[6];
+    I[6] = pixelVals[7];
+    I[7] = pixelVals[8];
+    I[8] = pixelVals[4];
+    
+    double max = 0;
+    for (int j=0; j<9; j++) {
+        sum = I[mod((j-1),9)] + I[j] + I[mod((j+1),9)];
+        if (sum > max)
+            max = sum;
     }
     
-    pgmOut->max_val = topVal;
-
-    return 0;
+    return (int)floor(382.5*(max/total-1.0/3));
 }
 
 //--------------------------------------------------------//
-//--------------- Apply a 1D Y convolution ---------------//
+//--------------    Apply a 3/9 operator     -------------//
 //--------------------------------------------------------//
-int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, op39Kernel);
+}
+
+const static int n0[] = {
+    0, 0, 0, 0, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 0, 0, 0, 0};
+
+const static int n1[] = {
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0};
+
+const static int n2[] = {
+    0, 0, 0, 1, 1,
+    0, 0, 1, 1, 1,
+    0, 0, 1, 1, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0};
+
+const static int n3[] = {
+    0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1,
+    0, 0, 1, 1, 1,
+    0, 0, 0, 1, 1,
+    0, 0, 0, 0, 0};
+
+const static int n4[] = {
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 1, 1, 0,
+    0, 0, 1, 1, 1,
+    0, 0, 0, 1, 1};
+
+const static int n5[] = {
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0};
+
+const static int n6[] = {
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 1, 1, 0, 0,
+    1, 1, 1, 0, 0,
+    1, 1, 0, 0, 0};
+
+const static int n7[] = {
+    0, 0, 0, 0, 0,
+    1, 1, 0, 0, 0,
+    1, 1, 1, 0, 0,
+    1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0};
+
+const static int n8[] = {
+    1, 1, 0, 0, 0,
+    1, 1, 1, 0, 0,
+    0, 1, 1, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0};
+
+const static int* nagao[] = {
+    n0, n1, n2, n3, n4, n5, n6, n7, n8
+};
+
+const int nagaoSize[9] = {9, 7, 7, 7, 7, 7, 7, 7, 7};
+
+double mean(int *array, int len)
+{
+    int sum = 0;
     
-    double sum;
-    int pixelVal;
-    int topVal = 0;
+    for (int i=0; i<len; i++)
+        sum += array[i];
+
+    return (double)sum/len;
+}
+
+double var(double m, int* array, int len)
+{
+    double sum = 0;
     
-    int ix;  // the index in the filter
-    int ic; // the index of the central pixel in the source image
-    int il; // the index of the pixel used in the integration
+    for (int i=0; i<len; i++)
+        sum += (array[i]-m)*(array[i]-m);
     
+    return sum/len;
+}
+
+//--------------------------------------------------------//
+//---------- Compute the Nagao-Matsuyama filter ----------//
+//--------------------------------------------------------//
+int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+{
+    const int *np = NULL;
+    int pixelVals[9];
+    int ix, in;
+    double m, v;
+    double min_var = 585225;
+    double sel_mean = 0;
+    
+    borderX = 2;
+    borderY = 2;
     int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    int filterHeight = filter->height;
-    
-    int halfFilterHeight = filterHeight/2;
-    int rowShift = halfFilterHeight*width;
-    
-    // Move to the first useful interior pixel
-    ic = rowShift;
-    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
-    
-    // Loop over all internal source image pixels
-    for (int row = halfFilterHeight; row < height-halfFilterHeight; row++) {
-        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = 0; col < width; col++) {
-            // compute the initial neighoboring pixel index to use in the convolution
-            il = ic-rowShift;
-            sum = 0;
-            ix = 0;
-            // Iterate over all filter pixels
-            for (int k=0; k < filterHeight; k++) {
-                D(fprintf(stderr,"k=%d,il=%d\n", k, il));
-                sum += pgmIn->pixels[il]*filter->kernel[ix++];
-                // move the index of the neighboring pixel to the next row
-                il += width;
+
+    for (int n=0; n<9; n++) {
+        np = nagao[n];
+        ix = 0;
+        in = 0;
+        // Iterate over all filter pixels
+        for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+            for (int l=-borderX; l <= borderX; l++, ix++) {
+                if (np[ix] == 1) {
+                    pixelVals[in] = pgmIn->pixels[il+l]*np[ix];
+                    in++;
+                }
             }
-            // output the value of the convolution in the destination image
-            pixelVal = (int)floor(sum);
-            pgmOut->pixels[ic++] = pixelVal;
-            if (pixelVal > topVal)
-                topVal = pixelVal;
-        }
-        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
-    }
-    
-    pgmOut->max_val = topVal;
-    return 0;
-}
-
-//--------------------------------------------------------//
-//------------------ Add uniform noise -------------------//
-//--------------------------------------------------------//
-int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
-{
-    int pixelVal;
-    
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        pixelVal = (random()&(2*range)-range)+pgmIn->pixels[i];
-        if (pixelVal > 255) {
-            pixelVal = 255;
-        }
-        if (pixelVal < 0) {
-            pixelVal = 0;
-        }
-        pgmOut->pixels[i] = pixelVal;
-    }
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//--------------- Add salt & pepper noise ----------------//
-//--------------------------------------------------------//
-int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
-{
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
         
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        if (drandom()<density) {
-            pgmOut->pixels[i] = pgmIn->pixels[i];
-        } else {
-            if (random()&01) {
-                pgmOut->pixels[i] = 0;
-            } else {
-                pgmOut->pixels[i] = 255;
-            }
+        m = mean(pixelVals,nagaoSize[n]);
+        v = var(m,pixelVals,nagaoSize[n]);
+        
+        if (v < min_var) {
+            min_var = v;
+            sel_mean = m;
         }
     }
-    
-    return 0;
+
+    return (int)floor(sel_mean);
+}
+
+//--------------------------------------------------------//
+//------------- Apply a Nagao-Matsuyama fiter ------------//
+//--------------------------------------------------------//
+int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
+{
+    return fapplyPGM(pgmIn, pgmOut, NULL, 2, 2, nagaoKernel);
 }

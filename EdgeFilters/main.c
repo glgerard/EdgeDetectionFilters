@@ -48,7 +48,6 @@ int main(int argc, char** argv)
 {
     char inputFile[MAXBUF];
     char outputFile[MAXBUF];
-    char pname[MAXBUF];
     
     if(argc == 1)
     {
@@ -71,28 +70,16 @@ int main(int argc, char** argv)
     
     srandom(357);
     
-    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    
     // test basic copy, flip, invert, normalize and equalize
     // testBasicFunctions(imgIn);
     
-    // apply Uniform noise
-    resetPGM(imgOut);
-    addUniformNoisePGM(imgIn, imgOut, 32);
-    sprintf(pname,"%s_uninoise.pgm", outputFile);
-    writePGM(imgOut,pname); 
-
-    // apply Salt & Pepper noise
-    resetPGM(imgOut);
-    addSaltPepperNoisePGM(imgIn, imgOut, 0.05);
-    sprintf(pname,"%s_snp.pgm", outputFile);
-    writePGM(imgOut,pname);
+    // testNoise(imgIn, outputFile);
 
     // testSharpening
     // testSharpening(imgIn, outputFile);
     
     // test Sobel
-    // testSobel(imgIn, outputFile);
+    testSobel(imgIn, outputFile);
 
     // test Gauss filter
     // testGauss(imgIn, outputFile);
@@ -101,13 +88,18 @@ int main(int argc, char** argv)
     // testDoG(imgIn, outputFile);
     
     // test denoise filters
-    testDenoise(imgIn, outputFile);
+    // testDenoise(imgIn, outputFile);
+    
+    // test the 3/9 operator
+    // testOP39(imgIn, outputFile);
+   
+    // test the 3/9 operator
+    testNagao(imgIn, outputFile);
     
     // calculate histogram and write it in a file
     // calcHist(imgIn);
     
     freePGM(&imgIn);
-    freePGM(&imgOut);
     
     return 0;
 }
