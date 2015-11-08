@@ -8,16 +8,20 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <libgen.h>
 #include "imageUtilities.h"
 #include "imageFilters.h"
 #include "imageOperations.h"
 #include "test.h"
 
 #define MAXBUF 4096
+#define TRUE 1
+#define FALSE 0
 
 int removeExt(char* src)
 {
-    for (int i = sizeof(src); i != 0; i--) {
+    for (int i = (int)strlen(src); i != 0; i--) {
         if (src[i] == '.') {
             src[i] = '\0';
             break;
@@ -46,60 +50,75 @@ int calcHist(Pgm* imgIn)
 
 int main(int argc, char** argv)
 {
+    char pname[MAXBUF];
+
+    int c;
+    int oflag = FALSE;
+    FILE *fp = NULL;
+    char *filename;
+    
     char inputFile[MAXBUF];
     char outputFile[MAXBUF];
-    
-    if(argc == 1)
+    char command[MAXBUF];
+
+    while ( (c = getopt(argc, argv, "f:o:")) != -1) {
+        switch (c) {
+            case 'f':
+                filename = basename(optarg);
+                strlcpy(command, filename, sizeof(command));
+                removeExt(command);
+                fp = fopen(optarg, "r");
+                if (fp == NULL) {
+                    printf("Command file \"%s\" not found.\n", optarg);
+                    exit(1);
+                }
+                break;
+            case 'o':
+                oflag = TRUE;
+                strlcpy(outputFile, optarg, sizeof(outputFile));
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (fp == NULL) {
+        printf("Error! No command file name\n");
+        exit(1);
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if(argc == 0)
     {
-        printf("Error! No file name\n");
+        printf("Error! No image file name\n");
         exit(1);
     }
     
-    strlcpy(inputFile, argv[1], sizeof(inputFile));
+    strlcpy(inputFile, argv[0], sizeof(inputFile));
     Pgm *imgIn = readPGM(inputFile);
     
     if(imgIn == NULL)
         exit(2);
     
-    if(argc==2) {
-        strlcpy(outputFile, argv[1], sizeof(outputFile));
-        removeExt(outputFile);
-    }
-    else
-        strlcpy(outputFile, argv[2], sizeof(outputFile));
-    
     srandom(357);
     
-    // test basic copy, flip, invert, normalize and equalize
-    // testBasicFunctions(imgIn);
+    if (oflag == FALSE) {
+        strlcpy(outputFile, argv[0], sizeof(outputFile));
+        removeExt(outputFile);
+    }
     
-    // testNoise(imgIn, outputFile);
-
-    // testSharpening
-    // testSharpening(imgIn, outputFile);
+    Pgm* imgOut = applyFilters(imgIn, fp);
     
-    // test Sobel
-    testSobel(imgIn, outputFile);
-
-    // test Gauss filter
-    // testGauss(imgIn, outputFile);
-    
-    // test DoG filter
-    // testDoG(imgIn, outputFile);
-    
-    // test denoise filters
-    // testDenoise(imgIn, outputFile);
-    
-    // test the 3/9 operator
-    // testOP39(imgIn, outputFile);
-   
-    // test the 3/9 operator
-    testNagao(imgIn, outputFile);
+    sprintf(pname,"%s_%s.pgm", outputFile, command);
+    writePGM(imgOut,pname);
     
     // calculate histogram and write it in a file
-    // calcHist(imgIn);
+    // calcHist(imgOut);
     
     freePGM(&imgIn);
+    freePGM(&imgOut);
     
     return 0;
 }

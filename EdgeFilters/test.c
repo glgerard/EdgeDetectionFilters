@@ -236,6 +236,7 @@ int testDoG(Pgm* imgIn, char* outputFile)
     Pgm* imgOut = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
     Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
 
+    fprintf(stderr, "\nDoG filtering (sigma = 6)\n");
     filter = DoGFilter(6, 0);
     // printFilter(filter);
     
@@ -350,6 +351,38 @@ int testNagao(Pgm* imgIn, char* outputFile)
     writePGM(imgOut,pname);
     
     freePGM(&imgOut);
+    
+    return 0;
+}
+
+int testAll(Pgm *imgIn, char* outputFile)
+{
+    // test basic copy, flip, invert, normalize and equalize
+    testBasicFunctions(imgIn);
+    
+    // test noise
+    testNoise(imgIn, outputFile);
+
+    // test sharpening
+    testSharpening(imgIn, outputFile);
+
+    // test denoise filters
+    testDenoise(imgIn, outputFile);
+    
+    // test Sobel
+    testSobel(imgIn, outputFile);
+    
+    // test Gauss filter
+    testGauss(imgIn, outputFile);
+    
+    // test DoG filter
+    testDoG(imgIn, outputFile);
+    
+    // test the 3/9 operator
+    testOP39(imgIn, outputFile);
+    
+    // test the 3/9 operator
+    testNagao(imgIn, outputFile);
     
     return 0;
 }

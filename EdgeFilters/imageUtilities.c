@@ -127,7 +127,7 @@ Pgm* readPGM(char* filename)
      sscanf(buffer, "%d", &max_val);
 
 	// Printing information on screen
-	printf("\nPGM Filename: %s\nPGM Width & Height: %d, %d\nPGM Max Val & Type: %d, %s\n\n", 
+	printf("\nPGM Filename: %s\nPGM Width & Height: %d, %d\nPGM Max Val & Type: %d, %s\n", 
 		   filename, width, height, max_val, binary ? "P5" : "P2");
 	
 	// Inizialize pgm
@@ -155,7 +155,7 @@ Pgm* readPGM(char* filename)
 	// Ok close the file
 	fclose(fp);
 	
-	printf("\nImage correctly loaded\n");
+	printf("\nImage \"%s\" correctly loaded.\n", filename);
 	
 	return pgm;
 }

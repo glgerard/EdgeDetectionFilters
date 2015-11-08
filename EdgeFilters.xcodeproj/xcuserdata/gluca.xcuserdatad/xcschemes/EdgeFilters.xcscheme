@@ -63,6 +63,10 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
+            argument = "-f /Users/gluca/Documents/CS/CV/images/sobel.flt"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "/Users/gluca/Documents/CS/CV/images/estate.pgm"
             isEnabled = "YES">
          </CommandLineArgument>

@@ -21,5 +21,6 @@ int testNoise(Pgm *imgIn, char* outputFile);
 int testDenoise(Pgm* imgIn, char* outputFile);
 int testOP39(Pgm* imgIn, char* outputFile);
 int testNagao(Pgm* imgIn, char* outputFile);
+int testAll(Pgm *imgIn, char* outputFile);
 
 #endif /* test_h */

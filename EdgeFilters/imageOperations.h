@@ -16,12 +16,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include "imageUtilities.h"
 #include "imageFilters.h"
-
-#define TRUE 1
-#define FALSE 0
 
 #define drandom() (((double)(random()&0xffffff))/0xffffff)
 
@@ -56,6 +54,7 @@ int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut);
 int op39PGM(Pgm *pgmIn, Pgm* pgmOut);
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut);
 
+Pgm* applyFilters(Pgm *pgmOrig, FILE *fp);
 
 
 #endif /* imageOperations_h */

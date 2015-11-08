@@ -7,463 +7,10 @@
 //
 
 #include "imageOperations.h"
+#include "helperFunctions.h"
+#include "wrappers.h"
 
-//--------------------------------------------------------//
-//-------------- Absolute of an Image --------------------//
-//--------------------------------------------------------//
-int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
-{
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        pgmOut->pixels[i] = abs(pgmIn->pixels[i]);
-    }
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//-------------- Threshold of an Image -------------------//
-//--------------------------------------------------------//
-int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
-{
-    if(!pgmIn | !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int pixelVal;
-    
-    if (threshold > 255) {
-        threshold = 255;
-    }
-    
-    if (threshold < 0) {
-        threshold = 0;
-    }
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    pgmOut->max_val = 255;
-    
-    for (int i = 0; i < width*height; i++) {
-        pixelVal = pgmIn->pixels[i];
-        if (pixelVal>threshold) {
-            pixelVal=255;
-        }
-        if (pixelVal<threshold) {
-            pixelVal=0;
-        }
-        pgmOut->pixels[i] = pixelVal;
-    }
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//-------------- Linearly Add two images -----------------//
-//--------------------------------------------------------//
-int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
-{
-    if(!pgmOp1 | !pgmOp2 | !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int pixelVal;
-    
-    int width = pgmOp1->width;
-    int height = pgmOp1->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        pixelVal = (int)(w1*pgmOp1->pixels[i] + w2*pgmOp2->pixels[i]);
-        pgmOut->pixels[i] = pixelVal;
-    }
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//---------- Compute the module of two images ------------//
-//--------------------------------------------------------//
-int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
-{
-    if(!pgmOpX || !pgmOpY | !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int pixelVal;
-    int topVal = 0;
-    
-    int width = pgmOpX->width;
-    int height = pgmOpX->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        pixelVal = (int)sqrt(pgmOpX->pixels[i]*pgmOpX->pixels[i] +
-                             pgmOpY->pixels[i]*pgmOpY->pixels[i]);
-        pgmOut->pixels[i] = pixelVal;
-        
-        if (pixelVal > topVal)
-            topVal = pixelVal;
-    }
-    
-    pgmOut->max_val = topVal;
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//---------- Compute the phase of two images ------------//
-//--------------------------------------------------------//
-int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
-{
-    if(!pgmOpX || !pgmOpY | !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int pixelVal;
-    double phi;
-    int topVal = 0;
-    
-    int width = pgmOpX->width;
-    int height = pgmOpX->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        phi = fabs(atan2(pgmOpY->pixels[i], pgmOpX->pixels[i]))*M_1_PI*255;
-        pixelVal = (int)phi;
-        pgmOut->pixels[i] = pixelVal;
-        
-        if (pixelVal > topVal)
-            topVal = pixelVal;
-    }
-    
-    pgmOut->max_val = topVal;
-
-    return 0;
-}
-
-//--------------------------------------------------------//
-//------------------ Add uniform noise -------------------//
-//--------------------------------------------------------//
-int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
-{
-    int randVal;
-    
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    if (range < 0) {
-        range = -range;
-    }
-    
-    if (range > 127) {
-        range = 127;
-    }
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        randVal = random()%(2*range)-range;
-        pgmOut->pixels[i] = pgmIn->pixels[i] + randVal;
-    }
-    
-    pgmOut->max_val = pgmIn->max_val+range;
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//--------------- Add salt & pepper noise ----------------//
-//--------------------------------------------------------//
-int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
-{
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    for (int i = 0; i < width*height; i++) {
-        if (drandom()<density) {
-            pgmOut->pixels[i] = pgmIn->pixels[i];
-        } else {
-            if (random()&01) {
-                pgmOut->pixels[i] = 0;
-            } else {
-                pgmOut->pixels[i] = 255;
-            }
-        }
-    }
-    
-    pgmOut->max_val = 255;
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//--- Scan an image and apply a function to each pixel ---//
-//--------------------------------------------------------//
-int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
-            int (*func)(Pgm*, double*, int, int, int))
-{
-    if(!pgmIn || !pgmOut)
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return -1;
-    }
-    
-    int pixelVal;
-    int topVal = 0;
-    double *kernel = NULL;
-    
-    int ic; // the index of the central pixel in the source image
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
-    if (filter != NULL) {
-        borderX = filter->width/2;
-        borderY = filter->height/2;
-        kernel = filter->kernel;
-    }
-    
-    // Move to the first useful interior pixel
-    ic = borderY*width+borderX;
-    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
-    D(fprintf(stderr,"bw=%d,bh=%d\n",borderX,borderY));
-    
-    // Loop over all internal source image pixels
-    for (int row = borderY; row < height-borderY; row++, ic += borderX*2) {
-        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = borderX; col < width-borderX; col++, ic++) {
-            D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
-            
-            pixelVal = func(pgmIn, kernel, borderX, borderY, ic);
-
-            pgmOut->pixels[ic] = pixelVal;
-            if (pixelVal > topVal)
-                topVal = pixelVal;
-        }
-        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
-        // move the index of the central pixel to the next row
-    }
-    
-    pgmOut->max_val = topVal;
-    
-    return 0;
-}
-
-
-//--------------------------------------------------------//
-//------ Check an eight neighbour for contour pixels -----//
-//--------------------------------------------------------//
-int contour2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
-{
-    double sum = 0;
-    int pixelVal = 255;
-    
-    int width = pgmIn->width;
-    
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
-            sum += pgmIn->pixels[il+l];
-
-    if (sum > 0 && sum < 255*(2*borderX+1)*(2*borderY+1)) {
-        pixelVal = 0;
-    }
-    return pixelVal;
-}
-
-//--------------------------------------------------------//
-//--------------- A simple contour check -----------------//
-//--------------------------------------------------------//
-int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut)
-{
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contour2DKernel);
-}
-
-//--------------------------------------------------------//
-//----- Check for contour pixels with N8 distance --------//
-//--------------------------------------------------------//
-int contourN8IntKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
-{
-    // skip background pixels
-    if  (pgmIn->pixels[ic] == 0 )
-        return 255;
-    
-    int pixelVal = 255;
-    int max_dist = 0;
-    
-    int width = pgmIn->width;
-    
-    // Iterate over all filter pixels
-    int dist = 0;
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++) {
-            if (pgmIn->pixels[il+l] == 0) {
-                dist = abs(k)+abs(l);
-            }
-            if (dist > max_dist) {
-                max_dist = dist;
-            }
-        }
-
-    if (max_dist >= 1) {
-        pixelVal = 0;
-    }
-    
-    return pixelVal;
-}
-
-//--------------------------------------------------------//
-//--------------- Apply a N8 contour check ---------------//
-//--------------------------------------------------------//
-int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
-{
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contourN8IntKernel);
-}
-
-//--------------------------------------------------------//
-//---------------------- Bubble Sort ---------------------//
-//--------------------------------------------------------//
-int* sort(int* array, int len)
-{
-    int temp;
-    int swap = TRUE;
-    
-    while (swap) {
-        swap = FALSE;
-        for (int i=0; i<len; i++) {
-            if (array[i] > array[i+1]) {
-                temp = array[i];
-                array[i] = array[i+1];
-                array[i+1] = temp;
-                swap = TRUE;
-            }
-        }
-    }
-    return array;
-}
-
-//--------------------------------------------------------//
-//---------- Compute an image submatrix median -----------//
-//--------------------------------------------------------//
-int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
-{
-    int* pixelVals;
-    int ix = 0;
-    
-    pixelVals = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
-    
-    int width = pgmIn->width;
-    
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
-            pixelVals[ix++] = pgmIn->pixels[il+l];
-    
-    int nPixels = ix;
-    
-    pixelVals = sort(pixelVals, nPixels);
-    
-    return pixelVals[nPixels/2];
-}
-
-//--------------------------------------------------------//
-//--------------    Apply a median filter    -------------//
-//--------------------------------------------------------//
-int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
-{
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, medianKernel);
-}
-
-int mod (int a, int b)
-{
-    int ret = a % b;
-    if(ret < 0)
-        ret+=b;
-    return ret;
-}
-
-//--------------------------------------------------------//
-//-------------    Compute the 3/9 operator   ------------//
-//--------------------------------------------------------//
-int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
-{
-    int pixelVals[9];
-    int I[9];
-    int sum = 0;
-
-    borderX = 1;
-    borderY = 1;
-    
-    int width = pgmIn->width;
-    
-    int total = 0;
-    int ix = 0;
-
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++) {
-            pixelVals[ix] = pgmIn->pixels[il+l];
-            total += pixelVals[ix++];
-        }
-    
-    if (total == 0)
-        return 0;
-    
-    // remapping
-    
-    I[0] = pixelVals[5];
-    I[1] = pixelVals[2];
-    I[2] = pixelVals[1];
-    I[3] = pixelVals[0];
-    I[4] = pixelVals[3];
-    I[5] = pixelVals[6];
-    I[6] = pixelVals[7];
-    I[7] = pixelVals[8];
-    I[8] = pixelVals[4];
-    
-    double max = 0;
-    for (int j=0; j<9; j++) {
-        sum = I[mod((j-1),9)] + I[j] + I[mod((j+1),9)];
-        if (sum > max)
-            max = sum;
-    }
-    
-    return (int)floor(382.5*(max/total-1.0/3));
-}
-
-//--------------------------------------------------------//
-//--------------    Apply a 3/9 operator     -------------//
-//--------------------------------------------------------//
-int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
-{
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, op39Kernel);
-}
-
+// Define the Nagao-Matsuyama matrixes
 const static int n0[] = {
     0, 0, 0, 0, 0,
     0, 1, 1, 1, 0,
@@ -533,24 +80,479 @@ const static int* nagao[] = {
 
 const int nagaoSize[9] = {9, 7, 7, 7, 7, 7, 7, 7, 7};
 
-double mean(int *array, int len)
+//--------------------------------------------------------//
+//-------------- Absolute of an Image --------------------//
+//--------------------------------------------------------//
+int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
-    int sum = 0;
+    int pixel;
+    int max_val = 0;
     
-    for (int i=0; i<len; i++)
-        sum += array[i];
-
-    return (double)sum/len;
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        pixel = abs(pgmIn->pixels[i]);
+        pgmOut->pixels[i] = pixel;
+        if ( pixel > max_val)
+            max_val = pixel;
+    }
+    
+    pgmOut->max_val = max_val;
+    
+    return 0;
 }
 
-double var(double m, int* array, int len)
+//--------------------------------------------------------//
+//-------------- Threshold of an Image -------------------//
+//--------------------------------------------------------//
+int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
 {
-    double sum = 0;
+    int pixel;
+
+    if(!pgmIn | !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
     
-    for (int i=0; i<len; i++)
-        sum += (array[i]-m)*(array[i]-m);
+    // Limit the threshold value between 0 and 255
+    if (threshold > 255) {
+        threshold = 255;
+    }
     
-    return sum/len;
+    if (threshold < 0) {
+        threshold = 0;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        pixel = pgmIn->pixels[i];
+        // Set the output value to black or white if it is
+        // below or above the threshold
+        if (pixel>threshold) {
+            pixel=255;
+        }
+        if (pixel<threshold) {
+            pixel=0;
+        }
+        pgmOut->pixels[i] = pixel;
+    }
+    
+    pgmOut->max_val = 255;
+
+    return 0;
+}
+
+//--------------------------------------------------------//
+//-------------- Linearly Add two images -----------------//
+//--------------------------------------------------------//
+int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
+{
+    int pixel;
+    int max_val = 0;
+
+    if(!pgmOp1 | !pgmOp2 | !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmOp1->width;
+    int height = pgmOp1->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        pixel = (int)(w1*pgmOp1->pixels[i] + w2*pgmOp2->pixels[i]);
+        pgmOut->pixels[i] = pixel;
+        if ( pixel > max_val)
+            max_val = pixel;
+    }
+    
+    pgmOut->max_val = max_val;
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//---------- Compute the module of two images ------------//
+//--------------------------------------------------------//
+int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
+{
+    int pixel;
+    int max_val = 0;
+    
+    if(!pgmOpX || !pgmOpY | !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmOpX->width;
+    int height = pgmOpX->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        pixel = (int)sqrt(pgmOpX->pixels[i]*pgmOpX->pixels[i] +
+                             pgmOpY->pixels[i]*pgmOpY->pixels[i]);
+        pgmOut->pixels[i] = pixel;
+        if (pixel > max_val)
+            max_val = pixel;
+    }
+    
+    pgmOut->max_val = max_val;
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//---------- Compute the phase of two images ------------//
+//--------------------------------------------------------//
+int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
+{
+    int pixel;
+    int max_val = 0;
+    double phi;
+    
+    if(!pgmOpX || !pgmOpY | !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmOpX->width;
+    int height = pgmOpX->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        phi = fabs(atan2(pgmOpY->pixels[i], pgmOpX->pixels[i]))*M_1_PI*255;
+        pixel = (int)phi;
+        pgmOut->pixels[i] = pixel;
+        if (pixel > max_val)
+            max_val = pixel;
+    }
+    
+    pgmOut->max_val = max_val;
+
+    return 0;
+}
+
+//--------------------------------------------------------//
+//------------------ Add uniform noise -------------------//
+//--------------------------------------------------------//
+int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
+{
+    int randVal;
+    
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    // Limit the noise range between 0 and 127
+    if (range < 0) {
+        range = -range;
+    }
+    if (range > 127) {
+        range = 127;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        randVal = random()%(2*range)-range;
+        pgmOut->pixels[i] = pgmIn->pixels[i] + randVal;
+    }
+    
+    pgmOut->max_val = pgmIn->max_val+range;
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//--------------- Add salt & pepper noise ----------------//
+//--------------------------------------------------------//
+int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
+{
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++) {
+        if (drandom()>density) {
+            pgmOut->pixels[i] = pgmIn->pixels[i];
+        } else {
+            // A density percentage of pixels will randomly
+            // be transformed to black or white
+            if (random()&01) {
+                pgmOut->pixels[i] = 0;
+            } else {
+                pgmOut->pixels[i] = 255;
+            }
+        }
+    }
+    
+    pgmOut->max_val = 255;
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//--- Scan an image and apply a function to each pixel ---//
+//--------------------------------------------------------//
+int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
+            int (*func)(Pgm*, double*, int, int, int))
+{
+    int pixel;
+    int max_val = 0;
+    double *kernel = NULL; // a local pointer to the filter matrix if defined
+    int ic; // the index of the central pixel in the source image
+    
+    if(!pgmIn || !pgmOut)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
+    if (filter != NULL) {
+        borderX = filter->width/2;
+        borderY = filter->height/2;
+        kernel = filter->kernel;
+    }
+    
+    // Timestamp
+    time_t t0 = time(0);
+
+    // Move to the first useful interior pixel
+    ic = borderY*width+borderX;
+    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    D(fprintf(stderr,"bw=%d,bh=%d\n",borderX,borderY));
+    
+    // Loop over all internal source image pixels
+    for (int row = borderY; row < height-borderY; row++, ic += borderX*2) {
+        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
+        for (int col = borderX; col < width-borderX; col++, ic++) {
+            D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
+            
+            // Apply the function to each pixel neighborhood
+            pixel = func(pgmIn, kernel, borderX, borderY, ic);
+
+            pgmOut->pixels[ic] = pixel;
+            if (pixel > max_val)
+                max_val = pixel;
+        }
+        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
+        // move the index of the central pixel to the next row
+    }
+    
+    pgmOut->max_val = max_val;
+    
+    // Timestamp
+    time_t t1 = time(0);
+    double datetime_diff_ms = difftime(t1, t0) * 1000.;
+    fprintf(stderr, "\nElapsed time (msec): %f\n", datetime_diff_ms);
+    
+    return 0;
+}
+
+
+//--------------------------------------------------------//
+//------ Check an eight neighbour for contour pixels -----//
+//--------------------------------------------------------//
+int contour2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+{
+    // This function computes the integral of the absolute values of the neighborhood.
+    // If the integral is 0 or max_val*"area of the neighborhood" the central pixel
+    // is not on the contour. Otherwise it is a contour pixel.
+    int sum = 0;
+    int pixel = 0;  // default output value (black, i.e. contour pixel)
+    int max_int = pgmIn->max_val*(2*borderX+1)*(2*borderY+1);
+    
+    int width = pgmIn->width;
+    
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++)
+            // Compute the integral of the neighborhood
+            sum += abs(pgmIn->pixels[il+l]);
+
+    if ((sum == 0) || (sum == max_int)) {
+        // The pixel is not a contour pixel and the output value is white
+        pixel = 255;
+    }
+    
+    return pixel;
+}
+
+//--------------------------------------------------------//
+//--------------- A simple contour check -----------------//
+//--------------------------------------------------------//
+int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut)
+{
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contour2DKernel);
+}
+
+//--------------------------------------------------------//
+//-- Check for internal contour pixels with N8 distance --//
+//--------------------------------------------------------//
+int contourN8IntKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+{
+    int pixel = 255;
+    int min_dist = borderX+borderY;
+    int dist = 0;
+    int bck = pgmIn->max_val;
+    
+    // skip background pixels
+    if  (pgmIn->pixels[ic] == bck )
+        return 255;
+
+    int width = pgmIn->width;
+    
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++) {
+            // Compute the distance with background pixels
+            if (pgmIn->pixels[il+l] == bck) {
+                dist = max(abs(k),abs(l));
+                if (dist < min_dist) {
+                    min_dist = dist;
+                }
+            }
+        }
+
+    // The pixel has unitary distance from the background
+    // therefore it belongs to the contour.
+    if (min_dist == 1) {
+        pixel = 0;
+    }
+    
+    return pixel;
+}
+
+//--------------------------------------------------------//
+//--------------- Apply a N8 contour check ---------------//
+//--------------------------------------------------------//
+int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
+{
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contourN8IntKernel);
+}
+
+
+//--------------------------------------------------------//
+//---------- Compute an image submatrix median -----------//
+//--------------------------------------------------------//
+int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+{
+    int* pixels;
+    int pixel;
+    int ix = 0;
+    int width = pgmIn->width;
+
+    pixels = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
+    
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++)
+            pixels[ix++] = pgmIn->pixels[il+l];
+    
+    int nPixels = ix;
+    
+    // Sort the pixels
+    pixels = sort(pixels, nPixels);
+    
+    // Store the pixel in the middle of the sorted list
+    pixel = pixels[nPixels/2];
+    
+    free(pixels);
+    
+    return pixel;
+}
+
+//--------------------------------------------------------//
+//--------------    Apply a median filter    -------------//
+//--------------------------------------------------------//
+int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
+{
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, medianKernel);
+}
+
+//--------------------------------------------------------//
+//-------------    Compute the 3/9 operator   ------------//
+//--------------------------------------------------------//
+int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+{
+    int pixels[9];
+    int I[9];
+    int sum = 0;
+
+    borderX = 1;
+    borderY = 1;
+    
+    int width = pgmIn->width;
+    
+    int total = 0;
+    int ix = 0;
+
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++) {
+            pixels[ix] = pgmIn->pixels[il+l];
+            total += pixels[ix++];
+        }
+    
+    if (total == 0)
+        return 0;
+    
+    // remapping
+    
+    I[0] = pixels[5];
+    I[1] = pixels[2];
+    I[2] = pixels[1];
+    I[3] = pixels[0];
+    I[4] = pixels[3];
+    I[5] = pixels[6];
+    I[6] = pixels[7];
+    I[7] = pixels[8];
+    I[8] = pixels[4];
+    
+    double max = 0;
+    for (int j=0; j<9; j++) {
+        sum = I[mod((j-1),9)] + I[j] + I[mod((j+1),9)];
+        if (sum > max)
+            max = sum;
+    }
+    
+    return (int)floor(382.5*(max/total-1.0/3));
+}
+
+//--------------------------------------------------------//
+//--------------    Apply a 3/9 operator     -------------//
+//--------------------------------------------------------//
+int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
+{
+    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, op39Kernel);
 }
 
 //--------------------------------------------------------//
@@ -561,7 +563,7 @@ int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
     const int *np = NULL;
     int pixelVals[9];
     int ix, in;
-    double m, v;
+    double v;
     double min_var = 585225;
     double sel_mean = 0;
     
@@ -582,12 +584,11 @@ int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
                 }
             }
         
-        m = mean(pixelVals,nagaoSize[n]);
-        v = var(m,pixelVals,nagaoSize[n]);
+        v = var(pixelVals,nagaoSize[n]);
         
         if (v < min_var) {
             min_var = v;
-            sel_mean = m;
+            sel_mean = mean(pixelVals,nagaoSize[n]);
         }
     }
 
@@ -600,4 +601,129 @@ int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
     return fapplyPGM(pgmIn, pgmOut, NULL, 2, 2, nagaoKernel);
+}
+
+//--------------------------------------------------------//
+//-------------  Apply a sequence of filters  ------------//
+//--------------------------------------------------------//
+Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
+{
+    Pgm* pgmIn = newPGM(pgmOrig->width, pgmOrig->height, pgmOrig->max_val);
+    Pgm* pgmOut = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    char buffer[64];
+    char *ch, *cmdline;
+    int iarg;
+    float farg;
+    
+    copyPGM(pgmOrig, pgmIn);
+    
+    while (!feof(fp)) {
+        // Read a line till \n or 64 char
+        fgets(buffer, 64, fp);
+        cmdline = trimwhitespace(buffer);
+        ch = strtok(buffer, " ");
+        if (strcmp(ch,"threshold")==0) {
+            ch = strtok(NULL, " ");
+            if (ch == NULL) {
+                iarg = 0;
+            } else
+                iarg = atoi(ch);
+            thresholdPGM(pgmIn, pgmOut, iarg);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"uniform_noise")==0) {
+            ch = strtok(NULL, " ");
+            if (ch == NULL) {
+                iarg = 32;
+            } else
+                iarg = atoi(ch);
+            addUniformNoisePGM(pgmIn, pgmOut, iarg);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"salt_n_pepper")==0) {
+            ch = strtok(NULL, " ");
+            if (ch == NULL) {
+                farg = 0.05;
+            } else
+                sscanf(ch,"%f",&farg);
+            addSaltPepperNoisePGM(pgmIn, pgmOut, farg);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"normalize")==0) {
+            normalizePGM(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"equalize")==0) {
+            equalizePGM(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"median")==0) {
+            medianPGM(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"internal_contour")==0) {
+            contourN8IntPGM(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"operator_39")==0) {
+            op39PGM(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"nagao")==0) {
+            nagaoPGM(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"sharpening")==0) {
+            applySharpening(pgmIn, pgmOut);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch, "sobel")==0) {
+            ch = strtok(NULL, " ");
+            if (ch==NULL) {
+                iarg = 0;
+            } else
+                if (strcmp(ch, "phase") == 0) {
+                    iarg = 1;
+                }
+                else
+                    iarg = 0;
+            applySobel(pgmIn, pgmOut, iarg);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch, "gauss")==0) {
+            ch = strtok(NULL, " ");
+            if (ch==NULL) {
+                farg = 1.0;
+                iarg = 0;
+            } else
+                sscanf(ch, "%f", &farg);
+                ch = strtok(NULL, " ");
+                if ( ch == NULL) {
+                    iarg = 0;
+                }
+                else
+                    iarg = atoi(ch);
+            applyGauss(pgmIn, pgmOut, farg, iarg);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch, "dog")==0) {
+            ch = strtok(NULL, " ");
+            if (ch==NULL) {
+                farg = 1.0;
+                iarg = 0;
+            } else
+                sscanf(ch, "%f", &farg);
+            ch = strtok(NULL, " ");
+            if ( ch == NULL) {
+                iarg = 0;
+            }
+            else
+                iarg = atoi(ch);
+            applyDoG(pgmIn, pgmOut, farg, iarg);
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        }
+    }
+    
+    return pgmIn;
 }
