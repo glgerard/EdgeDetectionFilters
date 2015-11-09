@@ -67,7 +67,7 @@ int main(int argc, char** argv)
                 filename = basename(optarg);
                 strlcpy(command, filename, sizeof(command));
                 removeExt(command);
-                fp = fopen(optarg, "r");
+                fp = fopen(optarg, "rb");
                 if (fp == NULL) {
                     printf("Command file \"%s\" not found.\n", optarg);
                     exit(1);

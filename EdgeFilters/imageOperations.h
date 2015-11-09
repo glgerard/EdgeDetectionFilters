@@ -34,6 +34,7 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut);
 //----------- Advanced image operations for PGM -----------//
 //---------------------------------------------------------//
 int medianPGM(Pgm *pgmIn, Pgm* pgmOut);
+int averagePGM(Pgm *pgmIn, Pgm* pgmOut);
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 

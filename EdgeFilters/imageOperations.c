@@ -499,6 +499,22 @@ int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
 }
 
 //--------------------------------------------------------//
+//-------------    Apply an average filter   -------------//
+//--------------------------------------------------------//
+int averagePGM(Pgm *pgmIn, Pgm* pgmOut)
+{
+    // apply a box filter
+    Filter *bxFilter = boxFilter(3,3);
+    printFilter(bxFilter);
+    
+    int ret = convolution2DPGM(pgmIn, pgmOut, bxFilter);
+    
+    freeFilter(&bxFilter);
+    
+    return ret;
+}
+
+//--------------------------------------------------------//
 //-------------    Compute the 3/9 operator   ------------//
 //--------------------------------------------------------//
 int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
@@ -609,7 +625,7 @@ int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
 {
     Pgm* pgmIn = newPGM(pgmOrig->width, pgmOrig->height, pgmOrig->max_val);
-    Pgm* pgmOut = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    Pgm* pgmOut = newPGM(pgmOrig->width, pgmOrig->height, pgmOrig->max_val);
     char buffer[64];
     char *ch, *cmdline;
     int iarg;
@@ -617,11 +633,10 @@ Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
     
     copyPGM(pgmOrig, pgmIn);
     
-    while (!feof(fp)) {
+    while (fgets(buffer,sizeof(buffer),fp)!=NULL) {
         // Read a line till \n or 64 char
-        fgets(buffer, 64, fp);
         cmdline = trimwhitespace(buffer);
-        ch = strtok(buffer, " ");
+        ch = strtok(cmdline, " ");
         if (strcmp(ch,"threshold")==0) {
             ch = strtok(NULL, " ");
             if (ch == NULL) {
@@ -659,6 +674,11 @@ Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
             resetPGM(pgmOut);
         } else if (strcmp(ch,"median")==0) {
             medianPGM(pgmIn, pgmOut);
+            fprintf(stderr,"Median completed\n");
+            copyPGM(pgmOut, pgmIn);
+            resetPGM(pgmOut);
+        } else if (strcmp(ch,"average")==0) {
+            averagePGM(pgmIn, pgmOut);
             copyPGM(pgmOut, pgmIn);
             resetPGM(pgmOut);
         } else if (strcmp(ch,"internal_contour")==0) {

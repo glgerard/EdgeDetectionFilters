@@ -290,6 +290,8 @@ int copyPGM(Pgm* pgmIn, Pgm* pgmOut)
 		// Copy image
 		outPixels[i] = inPixels[i];
 	}
+    
+    pgmOut->max_val = pgmIn->max_val;
 	
 	return 0;
 }
@@ -344,24 +346,26 @@ int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     int* histogram = histogramPGM(pgmIn);
     
     // find the min and max values
-    int lowVal = 0;
-    int topVal = pgmIn->max_val;
+    int min_val = 0;
+    int max_val = pgmIn->max_val;
     for (int i = 0; i < pgmIn->max_val+1; i++) {
         if (histogram[i] > 0) {
-            lowVal = i;
+            min_val = i;
             break;
         }
     }
     for (int i = pgmIn->max_val+1; i > 0; i--) {
         if (histogram[i] > 0) {
-            topVal = i;
+            max_val = i;
             break;
         }
     }
     
     for(int i = 0; i<width*height; i++) {
-        pgmOut->pixels[i] = (int)255*(pgmIn->pixels[i] - lowVal ) / (topVal-lowVal);
+        pgmOut->pixels[i] = (int)255*(pgmIn->pixels[i] - min_val ) / (max_val-min_val);
     }
+    
+    pgmOut->max_val = 255;
     
     return 0;
 }
