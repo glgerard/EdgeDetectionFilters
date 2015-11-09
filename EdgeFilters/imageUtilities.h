@@ -23,6 +23,14 @@ typedef struct
   int* pixels;
 } Pgm;
 
+typedef struct
+{
+    int min_val;
+    int max_val;
+    int size;
+    int* channels;
+} Histogram;
+
 //---------------------------------------------------------//
 //------------ Input/Output Functions for PGM -------------//
 //---------------------------------------------------------// 
@@ -38,7 +46,8 @@ void freePGM(Pgm** pgm);
 int invertPGM(Pgm* pgmIn, Pgm* pgmOut);
 int hflipPGM(Pgm* pgmImg, Pgm* pgmOut);
 int copyPGM(Pgm* pgmImg, Pgm* pgmOut);
-int* histogramPGM(Pgm* pgm); 
+Histogram* histogramPGM(Pgm* pgm);
+void freeHistogram(Histogram** h);
 
 //---------------------------------------------------------//
 //----------------- Other Functions for PGM ---------------//

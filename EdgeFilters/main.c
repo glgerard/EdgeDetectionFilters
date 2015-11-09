@@ -34,16 +34,16 @@ int calcHist(Pgm* imgIn)
 {
     // calculate histogram and write it in a file
     int i;
-    int* histogram = histogramPGM(imgIn);
+    Histogram* histogram = histogramPGM(imgIn);
     FILE* hist = fopen("histogram.dat", "w");
     
-    for(i=0; i<imgIn->max_val+1; i++)
+    for(i=0; i<histogram->size; i++)
     {
-        printf("HISTOGRAM[%d] = %d\n", i, histogram[i]);
-        fprintf(hist, "%d %d\n", i, histogram[i]);
+        printf("HISTOGRAM[%d] = %d\n", i+histogram->min_val, histogram->channels[i]);
+        fprintf(hist, "%d %d\n", i, histogram->channels[i]);
     }
     fclose(hist);
-    free(histogram);
+    freeHistogram(&histogram);
     
     return 0;
 }
@@ -109,16 +109,19 @@ int main(int argc, char** argv)
         removeExt(outputFile);
     }
     
-    Pgm* imgOut = applyFilters(imgIn, fp);
+    Pgm* imgOut = newPGM(imgIn->width, imgIn->height, 255);
+    
+    applyFilters(imgIn, imgOut, fp);
+    
+    // calculate histogram and write it in a file
+    calcHist(imgOut);
     
     sprintf(pname,"%s_%s.pgm", outputFile, command);
     writePGM(imgOut,pname);
     
-    // calculate histogram and write it in a file
-    // calcHist(imgOut);
-    
     freePGM(&imgIn);
     freePGM(&imgOut);
+    fclose(fp);
     
     return 0;
 }

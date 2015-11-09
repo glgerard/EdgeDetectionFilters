@@ -300,7 +300,7 @@ int copyPGM(Pgm* pgmIn, Pgm* pgmOut)
 //--------------------------------------------------------//
 //------------------ Calculate Histogram -----------------//
 //--------------------------------------------------------// 
-int* histogramPGM(Pgm* pgm)
+Histogram* histogramPGM(Pgm* pgm)
 {
 	if(!pgm)
 	{
@@ -308,24 +308,47 @@ int* histogramPGM(Pgm* pgm)
 		return NULL;
 	}
 	
-	int i,index;
+    int i,index, pixel;
 	int width = pgm->width;
 	int height = pgm->height;
 	int max_val = pgm->max_val;
-	
+    
+    Histogram* histo = (Histogram*)calloc(1, sizeof(Histogram));
+    histo->max_val = max_val;
+    
+    int min_val = max_val;
+    for(i=0; i<width*height; i++)
+    {
+        pixel = pgm->pixels[i];
+        if ( pixel < min_val )
+            min_val = pixel;
+    }
+    histo->min_val = min_val;
+    histo->size = max_val - min_val + 1;
+    
 	// if max_val is 255 each pixel of the image can have a value between [0;255]
 	// so histogram have a dimension of 256
-	int* histogram = (int*)calloc(max_val+1,sizeof(int));
+	histo->channels = (int*)calloc(histo->size,sizeof(int));
 
 	for(i=0; i<width*height; i++)
 	{
-		index = pgm->pixels[i];
-		histogram[index]++;
+		index = pgm->pixels[i]-min_val;
+		histo->channels[index]++;
 	}
 	
-	return histogram;
+	return histo;
 }
 
+//--------------------------------------------------------//
+//-------------- Free an Histogram structure -------------//
+//--------------------------------------------------------//
+void freeHistogram(Histogram** handle)
+{
+    free((*handle)->channels);
+    (*handle)->channels = NULL;
+    free(*handle);
+    *handle = NULL;
+}
 
 //--------------------------------------------------------//
 //------------------ Normalize the Image -----------------//
@@ -340,33 +363,30 @@ int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     
     int width = pgmIn->width;
     int height = pgmIn->height;
+    int top_val = 0;
     
     // compute the histogram
     
-    int* histogram = histogramPGM(pgmIn);
+    Histogram* histogram = histogramPGM(pgmIn);
     
     // find the min and max values
-    int min_val = 0;
-    int max_val = pgmIn->max_val;
-    for (int i = 0; i < pgmIn->max_val+1; i++) {
-        if (histogram[i] > 0) {
-            min_val = i;
-            break;
-        }
-    }
-    for (int i = pgmIn->max_val+1; i > 0; i--) {
-        if (histogram[i] > 0) {
-            max_val = i;
+    int min_val = histogram->min_val;
+
+    for (int i = histogram->size-1; i > 0; i--) {
+        if (histogram->channels[i] > 0) {
+            top_val = i+min_val;
             break;
         }
     }
     
     for(int i = 0; i<width*height; i++) {
-        pgmOut->pixels[i] = (int)255*(pgmIn->pixels[i] - min_val ) / (max_val-min_val);
+        pgmOut->pixels[i] = (int)255*(pgmIn->pixels[i] - min_val ) / (top_val-min_val);
     }
     
     pgmOut->max_val = 255;
-    
+
+    freeHistogram(&histogram);
+
     return 0;
 }
 
@@ -387,18 +407,20 @@ int equalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     
     // compute the histogram
     
-    int* histogram = histogramPGM(pgmIn);
+    Histogram* histogram = histogramPGM(pgmIn);
 
     int tot = 0;
-    for (int s=0; s<pgmIn->max_val+1; s++) {
-        tot += histogram[s];
+    for (int s=0; s<histogram->size; s++) {
+        tot += histogram->channels[s];
     }
     for(int i = 0; i<width*height; i++) {
         sum = 0;
         for (int s=0; s <= pgmIn->pixels[i]; s++) {
-            sum += histogram[s];
+            sum += histogram->channels[s];
         }
         pgmOut->pixels[i] = (int) 255*sum/tot;
     }
+    
+    freeHistogram(&histogram);
     return 0;
 }

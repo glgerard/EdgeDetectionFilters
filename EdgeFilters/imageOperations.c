@@ -622,18 +622,19 @@ int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 //--------------------------------------------------------//
 //-------------  Apply a sequence of filters  ------------//
 //--------------------------------------------------------//
-Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
+int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
 {
-    Pgm* pgmIn = newPGM(pgmOrig->width, pgmOrig->height, pgmOrig->max_val);
-    Pgm* pgmOut = newPGM(pgmOrig->width, pgmOrig->height, pgmOrig->max_val);
     char buffer[64];
     char *ch, *cmdline;
     int iarg;
     float farg;
     
-    copyPGM(pgmOrig, pgmIn);
+    Pgm* pgmTmp = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+
+    copyPGM(pgmIn, pgmOut);
     
     while (fgets(buffer,sizeof(buffer),fp)!=NULL) {
+        copyPGM(pgmOut, pgmTmp);
         // Read a line till \n or 64 char
         cmdline = trimwhitespace(buffer);
         ch = strtok(cmdline, " ");
@@ -643,60 +644,39 @@ Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
                 iarg = 0;
             } else
                 iarg = atoi(ch);
-            thresholdPGM(pgmIn, pgmOut, iarg);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            thresholdPGM(pgmTmp, pgmOut, iarg);
         } else if (strcmp(ch,"uniform_noise")==0) {
             ch = strtok(NULL, " ");
             if (ch == NULL) {
                 iarg = 32;
             } else
                 iarg = atoi(ch);
-            addUniformNoisePGM(pgmIn, pgmOut, iarg);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            addUniformNoisePGM(pgmTmp, pgmOut, iarg);
         } else if (strcmp(ch,"salt_n_pepper")==0) {
             ch = strtok(NULL, " ");
             if (ch == NULL) {
                 farg = 0.05;
             } else
                 sscanf(ch,"%f",&farg);
-            addSaltPepperNoisePGM(pgmIn, pgmOut, farg);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            addSaltPepperNoisePGM(pgmTmp, pgmOut, farg);
         } else if (strcmp(ch,"normalize")==0) {
-            normalizePGM(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            normalizePGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"equalize")==0) {
-            equalizePGM(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            equalizePGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"median")==0) {
-            medianPGM(pgmIn, pgmOut);
+            fprintf(stderr,"Start median\n");
+            medianPGM(pgmTmp, pgmOut);
             fprintf(stderr,"Median completed\n");
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
         } else if (strcmp(ch,"average")==0) {
-            averagePGM(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            averagePGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"internal_contour")==0) {
-            contourN8IntPGM(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            contourN8IntPGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"operator_39")==0) {
-            op39PGM(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            op39PGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"nagao")==0) {
-            nagaoPGM(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            nagaoPGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"sharpening")==0) {
-            applySharpening(pgmIn, pgmOut);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            applySharpening(pgmTmp, pgmOut);
         } else if (strcmp(ch, "sobel")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -707,9 +687,7 @@ Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
                 }
                 else
                     iarg = 0;
-            applySobel(pgmIn, pgmOut, iarg);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            applySobel(pgmTmp, pgmOut, iarg);
         } else if (strcmp(ch, "gauss")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -723,9 +701,7 @@ Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
                 }
                 else
                     iarg = atoi(ch);
-            applyGauss(pgmIn, pgmOut, farg, iarg);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            applyGauss(pgmTmp, pgmOut, farg, iarg);
         } else if (strcmp(ch, "dog")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -739,11 +715,10 @@ Pgm* applyFilters(Pgm *pgmOrig, FILE *fp)
             }
             else
                 iarg = atoi(ch);
-            applyDoG(pgmIn, pgmOut, farg, iarg);
-            copyPGM(pgmOut, pgmIn);
-            resetPGM(pgmOut);
+            applyDoG(pgmTmp, pgmOut, farg, iarg);
         }
     }
     
-    return pgmIn;
+    freePGM(&pgmTmp);
+    return 0;
 }

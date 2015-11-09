@@ -55,7 +55,6 @@ int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut);
 int op39PGM(Pgm *pgmIn, Pgm* pgmOut);
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut);
 
-Pgm* applyFilters(Pgm *pgmOrig, FILE *fp);
-
+int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp);
 
 #endif /* imageOperations_h */
