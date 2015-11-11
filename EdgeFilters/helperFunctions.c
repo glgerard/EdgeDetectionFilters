@@ -99,3 +99,44 @@ char *trimwhitespace(char *str)
     
     return str;
 }
+
+int quadrant(int a)
+{
+    int angle = (int)(a/22.5);
+
+    /**
+    if ((-8 <= angle) && (angle < -7))
+        return 0;
+    else if ((-7 <= angle) && (angle < -5))
+        return 1;
+    else if ((-5 <= angle) && (angle < -3))
+        return 2;
+    else if ((-3 <= angle) && (angle < -1))
+        return 3;
+    else if ((-1 <= angle) && (angle < 1) )
+        return 0;
+    else if ((1 <= angle) && (angle < 3))
+        return 1;
+    else if ((3 <= angle) && (angle < 5))
+        return 2;
+    else if ((5 <= angle) && (angle < 7))
+        return 3;
+    else if ((angle <= 8))
+        return 0;
+**/
+    
+    if ((-6 == angle) || (angle == -5))
+        return 1;
+    else if ((-4 == angle) || (angle == -3))
+        return 2;
+    else if ((-2 == angle) || (angle == -1))
+        return 3;
+    else if ((1 == angle) || (angle == 2))
+        return 1;
+    else if ((3 == angle) || (angle == 4))
+        return 2;
+    else if ((5 == angle) || (angle == 6))
+        return 3;
+    
+    return 0;
+}

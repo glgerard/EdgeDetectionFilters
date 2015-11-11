@@ -18,6 +18,7 @@
 int applySharpening(Pgm* imgIn, Pgm* imgOut);
 int applyGauss(Pgm* imgIn, Pgm* imgOut, double sigma, int dim);
 int applySobel(Pgm* pgmIn, Pgm* pgmOut, int iarg);
+int applyPrewitt(Pgm* imgIn, Pgm* imgOut, int eval);
 int applyDoG(Pgm* imgIn, Pgm* imgOut, double sigma, int dim);
-
+int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int thresholdRatio);
 #endif /* wrappers_h */

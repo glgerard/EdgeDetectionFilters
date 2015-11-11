@@ -22,5 +22,6 @@ double mean(int *array, int len);
 double var(int* array, int len);
 int* sort(int* array, int len);
 char *trimwhitespace(char *str);
+int quadrant(int a);
 
 #endif /* helperFunctions_h */

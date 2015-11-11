@@ -225,6 +225,9 @@ Filter* DoGFilter(double sigma, int dim)
     double sigmaExt = sigma;
     double sigmaInt = sigma/1.66;
     
+    if (dim == 0)
+        dim = (int)(2*sigma)*2+1;
+    
     Filter *gaussExtFilter = gauss2DFilter(sigmaExt, dim);
     Filter *gaussIntFilter = gauss2DFilter(sigmaInt, dim);
     
@@ -237,17 +240,17 @@ Filter* DoGFilter(double sigma, int dim)
 //--------------------------------------------------------//
 //----- Convolve an image submatrix with a filter --------//
 //--------------------------------------------------------//
-int convolution2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
     double sum = 0;
     
-    int width = pgmIn->width;
+    int width = pgmIn1->width;
     
     int ix = 0;
     // Iterate over all filter pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++)
-            sum += pgmIn->pixels[il+l]*kernel[ix++];
+            sum += pgmIn1->pixels[il+l]*kernel[ix++];
     
     return (int)floor(sum);
 }
@@ -258,7 +261,7 @@ int convolution2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, in
 
 int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
-    return fapplyPGM(pgmIn, pgmOut, filter, 0, 0, convolution2DKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, filter, 0, 0, convolution2DKernel);
 }
 
 //--------------------------------------------------------//

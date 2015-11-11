@@ -13,6 +13,7 @@
 #include "imageUtilities.h"
 #include "imageFilters.h"
 #include "imageOperations.h"
+#include "helperFunctions.h"
 #include "test.h"
 
 #define MAXBUF 4096

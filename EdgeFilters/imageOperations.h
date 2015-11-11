@@ -38,8 +38,8 @@ int averagePGM(Pgm *pgmIn, Pgm* pgmOut);
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 
-int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
-            int (*func)(Pgm*, double*, int, int, int));
+int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
+            int (*func)(Pgm*, Pgm*, double*, int, int, int));
 
 //---------------------------------------------------------//
 //--------------- Noise  operations for PGM ---------------//
@@ -54,6 +54,8 @@ int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut);
 int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut);
 int op39PGM(Pgm *pgmIn, Pgm* pgmOut);
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut);
+int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut);
+int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut);
 
 int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp);
 

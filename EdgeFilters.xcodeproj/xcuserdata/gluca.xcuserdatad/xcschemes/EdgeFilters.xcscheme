@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-f /Users/gluca/Documents/CS/CV/images/debug.flt"
+            argument = "-f /Users/gluca/Documents/CS/CV/images/filters/debug.flt"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

@@ -235,7 +235,7 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
     
     // Iterate over all pixels
     for (int i = 0; i < width*height; i++) {
-        phi = fabs(atan2(pgmOpY->pixels[i], pgmOpX->pixels[i]))*M_1_PI*255;
+        phi = atan2(pgmOpY->pixels[i], pgmOpX->pixels[i])*M_1_PI*127;
         pixel = (int)phi;
         pgmOut->pixels[i] = pixel;
         if (pixel > max_val)
@@ -319,22 +319,22 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
 //--------------------------------------------------------//
 //--- Scan an image and apply a function to each pixel ---//
 //--------------------------------------------------------//
-int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
-            int (*func)(Pgm*, double*, int, int, int))
+int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
+              int (*func)(Pgm*, Pgm*, double*, int, int, int))
 {
     int pixel;
     int max_val = 0;
     double *kernel = NULL; // a local pointer to the filter matrix if defined
     int ic; // the index of the central pixel in the source image
     
-    if(!pgmIn || !pgmOut)
+    if(!pgmIn1 || !pgmOut)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
         return -1;
     }
     
-    int width = pgmIn->width;
-    int height = pgmIn->height;
+    int width = pgmIn1->width;
+    int height = pgmIn1->height;
     
     if (filter != NULL) {
         borderX = filter->width/2;
@@ -357,7 +357,7 @@ int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
             D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
             
             // Apply the function to each pixel neighborhood
-            pixel = func(pgmIn, kernel, borderX, borderY, ic);
+            pixel = func(pgmIn1, pgmIn2, kernel, borderX, borderY, ic);
 
             pgmOut->pixels[ic] = pixel;
             if (pixel > max_val)
@@ -381,22 +381,22 @@ int fapplyPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
 //--------------------------------------------------------//
 //------ Check an eight neighbour for contour pixels -----//
 //--------------------------------------------------------//
-int contour2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+int contour2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
     // This function computes the integral of the absolute values of the neighborhood.
     // If the integral is 0 or max_val*"area of the neighborhood" the central pixel
     // is not on the contour. Otherwise it is a contour pixel.
     int sum = 0;
     int pixel = 0;  // default output value (black, i.e. contour pixel)
-    int max_int = pgmIn->max_val*(2*borderX+1)*(2*borderY+1);
+    int max_int = pgmIn1->max_val*(2*borderX+1)*(2*borderY+1);
     
-    int width = pgmIn->width;
+    int width = pgmIn1->width;
     
     // Iterate over all filter pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++)
             // Compute the integral of the neighborhood
-            sum += abs(pgmIn->pixels[il+l]);
+            sum += abs(pgmIn1->pixels[il+l]);
 
     if ((sum == 0) || (sum == max_int)) {
         // The pixel is not a contour pixel and the output value is white
@@ -411,30 +411,30 @@ int contour2DKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic
 //--------------------------------------------------------//
 int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contour2DKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, contour2DKernel);
 }
 
 //--------------------------------------------------------//
 //-- Check for internal contour pixels with N8 distance --//
 //--------------------------------------------------------//
-int contourN8IntKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+int contourN8IntKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
     int pixel = 255;
     int min_dist = borderX+borderY;
     int dist = 0;
-    int bck = pgmIn->max_val;
+    int bck = pgmIn1->max_val;
     
     // skip background pixels
-    if  (pgmIn->pixels[ic] == bck )
+    if  (pgmIn1->pixels[ic] == bck )
         return 255;
 
-    int width = pgmIn->width;
+    int width = pgmIn1->width;
     
     // Iterate over all filter pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++) {
             // Compute the distance with background pixels
-            if (pgmIn->pixels[il+l] == bck) {
+            if (pgmIn1->pixels[il+l] == bck) {
                 dist = max(abs(k),abs(l));
                 if (dist < min_dist) {
                     min_dist = dist;
@@ -456,26 +456,26 @@ int contourN8IntKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int
 //--------------------------------------------------------//
 int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, contourN8IntKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, contourN8IntKernel);
 }
 
 
 //--------------------------------------------------------//
 //---------- Compute an image submatrix median -----------//
 //--------------------------------------------------------//
-int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
     int* pixels;
     int pixel;
     int ix = 0;
-    int width = pgmIn->width;
+    int width = pgmIn1->width;
 
     pixels = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
     
     // Iterate over all filter pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++)
-            pixels[ix++] = pgmIn->pixels[il+l];
+            pixels[ix++] = pgmIn1->pixels[il+l];
     
     int nPixels = ix;
     
@@ -495,7 +495,7 @@ int medianKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
 //--------------------------------------------------------//
 int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, medianKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, medianKernel);
 }
 
 //--------------------------------------------------------//
@@ -517,7 +517,7 @@ int averagePGM(Pgm *pgmIn, Pgm* pgmOut)
 //--------------------------------------------------------//
 //-------------    Compute the 3/9 operator   ------------//
 //--------------------------------------------------------//
-int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
     int pixels[9];
     int I[9];
@@ -526,7 +526,7 @@ int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
     borderX = 1;
     borderY = 1;
     
-    int width = pgmIn->width;
+    int width = pgmIn1->width;
     
     int total = 0;
     int ix = 0;
@@ -534,7 +534,7 @@ int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
     // Iterate over all filter pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++) {
-            pixels[ix] = pgmIn->pixels[il+l];
+            pixels[ix] = pgmIn1->pixels[il+l];
             total += pixels[ix++];
         }
     
@@ -568,13 +568,13 @@ int op39Kernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
 //--------------------------------------------------------//
 int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, pgmOut, NULL, 1, 1, op39Kernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, op39Kernel);
 }
 
 //--------------------------------------------------------//
 //---------- Compute the Nagao-Matsuyama filter ----------//
 //--------------------------------------------------------//
-int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
+int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
     const int *np = NULL;
     int pixelVals[9];
@@ -585,7 +585,7 @@ int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
     
     borderX = 2;
     borderY = 2;
-    int width = pgmIn->width;
+    int width = pgmIn1->width;
 
     for (int n=0; n<9; n++) {
         np = nagao[n];
@@ -595,7 +595,7 @@ int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
         for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
             for (int l=-borderX; l <= borderX; l++, ix++) {
                 if (np[ix] == 1) {
-                    pixelVals[in] = pgmIn->pixels[il+l]*np[ix];
+                    pixelVals[in] = pgmIn1->pixels[il+l]*np[ix];
                     in++;
                 }
             }
@@ -612,11 +612,78 @@ int nagaoKernel(Pgm* pgmIn, double* kernel, int borderX, int borderY, int ic)
 }
 
 //--------------------------------------------------------//
-//------------- Apply a Nagao-Matsuyama fiter ------------//
+//--------------    Apply a Nagao filter     -------------//
 //--------------------------------------------------------//
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, pgmOut, NULL, 2, 2, nagaoKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 2, 2, nagaoKernel);
+}
+
+const int neighbors[] = {
+    1, 7,
+    2, 6,
+    3, 5,
+    0, 8
+};
+
+//--------------------------------------------------------//
+//-------------    A suppression algorithm    ------------//
+//--------------------------------------------------------//
+int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int borderX, int borderY, int ic)
+{
+    int pixels[9];
+    int ix = 0;
+    
+    int width = pgmMod->width;
+
+    // Iterate over all filter pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++) {
+            pixels[ix++] = pgmMod->pixels[il+l];
+        }
+    
+    int q = quadrant((int)(180.0*pgmPhi->pixels[ic]/127));
+    
+    if((pixels[4] >= pixels[neighbors[2*q]]) && (pixels[4] >= pixels[neighbors[2*q+1]]))
+        return pixels[4];
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//-------------  Apply a suppression kernel   ------------//
+//--------------------------------------------------------//
+int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
+{
+    return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 1, 1, suppressionKernel);
+}
+
+//--------------------------------------------------------//
+//-------------    A connectivity algorithm   ------------//
+//--------------------------------------------------------//
+int connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, double* kernel, int borderX, int borderY, int ic)
+{
+    if (pgmNL->pixels[ic] == 0)
+        return 0;
+    
+    int width = pgmNL->width;
+    
+    // Iterate over all N8 set in NH pixels
+    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
+        for (int l=-borderX; l <= borderX; l++)
+            // There is a pixel in pgmNH connected
+            if (pgmNH->pixels[il+l] != 0)
+                return pgmNL->pixels[ic];
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//-------------  Apply a connectivity kernel   -----------//
+//--------------------------------------------------------//
+int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut)
+{
+    return fapplyPGM(pgmNH, pgmNL, pgmOut, NULL, 1, 1, connectivityKernel);
 }
 
 //--------------------------------------------------------//
@@ -677,6 +744,17 @@ int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
             nagaoPGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"sharpening")==0) {
             applySharpening(pgmTmp, pgmOut);
+        } else if (strcmp(ch, "prewitt")==0) {
+            ch = strtok(NULL, " ");
+            if (ch==NULL) {
+                iarg = 0;
+            } else
+                if (strcmp(ch, "phase") == 0) {
+                    iarg = 1;
+                }
+                else
+                    iarg = 0;
+            applyPrewitt(pgmTmp, pgmOut, iarg);
         } else if (strcmp(ch, "sobel")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -716,9 +794,24 @@ int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
             else
                 iarg = atoi(ch);
             applyDoG(pgmTmp, pgmOut, farg, iarg);
+        } else if (strcmp(ch, "ced")==0) {
+            ch = strtok(NULL, " ");
+            if (ch==NULL) {
+                farg = 1.0;
+                iarg = 0;
+            } else
+                sscanf(ch, "%f", &farg);
+            ch = strtok(NULL, " ");
+            if ( ch == NULL) {
+                iarg = 64;
+            }
+            else
+                iarg = atoi(ch);
+            applyCED(pgmTmp, pgmOut, farg, 0, iarg, 1);
         }
+        
     }
-    
+
     freePGM(&pgmTmp);
     return 0;
 }
