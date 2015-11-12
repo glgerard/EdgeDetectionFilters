@@ -621,9 +621,9 @@ int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 
 const int neighbors[] = {
     1, 7,
-    2, 6,
+    0, 8,
     3, 5,
-    0, 8
+    2, 6
 };
 
 //--------------------------------------------------------//
@@ -797,17 +797,17 @@ int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
         } else if (strcmp(ch, "ced")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
-                farg = 1.0;
+                farg = sqrt(2.0);
                 iarg = 0;
             } else
                 sscanf(ch, "%f", &farg);
             ch = strtok(NULL, " ");
             if ( ch == NULL) {
-                iarg = 64;
+                iarg = 25;
             }
             else
                 iarg = atoi(ch);
-            applyCED(pgmTmp, pgmOut, farg, 0, iarg, 1);
+            applyCED(pgmTmp, pgmOut, farg, 0, iarg, iarg*3);
         }
         
     }

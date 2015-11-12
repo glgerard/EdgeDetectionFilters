@@ -134,11 +134,8 @@ int applyDoG(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
     return 0;
 }
 
-int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int thresholdRatio)
-{
-    int threshold_high = threshold;
-    int threshold_low = 0;
-    
+int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, int threshold_high)
+{    
     Pgm* imgOutX = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
     Pgm* imgOutY = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
     Pgm* imgOutMod = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
@@ -146,8 +143,8 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int 
 
     applyGauss(imgIn, imgOut, sigma, dim);
     
-    Filter* gx = prewittXFilter();
-    Filter* gy = prewittYFilter();
+    Filter* gx = sobelXFilter();
+    Filter* gy = sobelYFilter();
     
     convolution2DPGM(imgOut, imgOutX, gx);
     convolution2DPGM(imgOut, imgOutY, gy);
@@ -156,19 +153,14 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int 
     phasePGM(imgOutX, imgOutY, imgOutPhi);
     
     resetPGM(imgOut);
-    
+   
     suppressionPGM(imgOutMod, imgOutPhi, imgOut);
 
     freePGM(&imgOutX);
     freePGM(&imgOutY);
     freePGM(&imgOutMod);
     freePGM(&imgOutPhi);
-    
-    if (thresholdRatio == 0) {
-        threshold_low = threshold/2;
-    } else
-        threshold_low = threshold/3;
-    
+
     Pgm *imgNH = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
     Pgm *imgNLshadow = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
 
@@ -177,7 +169,7 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int 
     
     Pgm *imgNL = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
     linearAddPGM(imgNLshadow, imgNH, 1.0, -1.0, imgNL);
-    
+
     Histogram *hist;
     int change = 0;
     int size = imgNH->width*imgNH->height;
@@ -202,9 +194,11 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int 
         printf("%d\n", hist->channels[0]);
         
     }
+
     
     copyPGM(imgNH, imgOut);
 
+    
     freePGM(&imgNLshadow);
     freePGM(&imgNH);
     freePGM(&imgNL);
