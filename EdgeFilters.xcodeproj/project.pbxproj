@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3611C0341BF60CAA0070B2E2 /* imageContours.c in Sources */ = {isa = PBXBuildFile; fileRef = 3611C0321BF60CAA0070B2E2 /* imageContours.c */; };
 		36AB89F41BE4DDDB003C0E5B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F31BE4DDDB003C0E5B /* main.c */; };
 		36AB89FB1BE4DDFB003C0E5B /* imageFilters.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F51BE4DDFB003C0E5B /* imageFilters.c */; };
 		36AB89FC1BE4DDFB003C0E5B /* imageBasicOps.c in Sources */ = {isa = PBXBuildFile; fileRef = 36AB89F71BE4DDFB003C0E5B /* imageBasicOps.c */; };
@@ -29,6 +30,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3611C0321BF60CAA0070B2E2 /* imageContours.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageContours.c; sourceTree = "<group>"; };
+		3611C0331BF60CAA0070B2E2 /* imageContours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageContours.h; sourceTree = "<group>"; };
 		36AB89E91BE4DD61003C0E5B /* EdgeFilters */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EdgeFilters; sourceTree = BUILT_PRODUCTS_DIR; };
 		36AB89F31BE4DDDB003C0E5B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		36AB89F51BE4DDFB003C0E5B /* imageFilters.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageFilters.c; sourceTree = "<group>"; };
@@ -88,6 +91,8 @@
 				36AB8A031BEDFB69003C0E5B /* helperFunctions.h */,
 				36AB8A051BEE47A8003C0E5B /* imageFilterOps.c */,
 				36AB8A061BEE47A8003C0E5B /* imageFilterOps.h */,
+				3611C0321BF60CAA0070B2E2 /* imageContours.c */,
+				3611C0331BF60CAA0070B2E2 /* imageContours.h */,
 			);
 			path = EdgeFilters;
 			sourceTree = "<group>";
@@ -148,6 +153,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3611C0341BF60CAA0070B2E2 /* imageContours.c in Sources */,
 				36AB8A011BE7D161003C0E5B /* test.c in Sources */,
 				36AB8A071BEE47A8003C0E5B /* imageFilterOps.c in Sources */,
 				36AB89FD1BE4DDFB003C0E5B /* imageUtilities.c in Sources */,

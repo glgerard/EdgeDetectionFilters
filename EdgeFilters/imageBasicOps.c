@@ -1,5 +1,5 @@
 //
-//  imageOperations.c
+//  imageBasicOps.c
 //  EdgeFilters
 //
 //  Created by Gianluca Gerard on 25/10/15.
@@ -7,8 +7,6 @@
 //
 
 #include "imageBasicOps.h"
-#include "helperFunctions.h"
-#include "imageFilterOps.h"
 
 //--------------------------------------------------------//
 //-------------- Absolute of an Image --------------------//
@@ -381,58 +379,4 @@ int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     
     pgmOut->max_val = topVal;
     return 0;
-}
-
-//--------------------------------------------------------//
-//---------- Compute an image submatrix median -----------//
-//--------------------------------------------------------//
-int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
-{
-    int* pixels;
-    int pixel;
-    int ix = 0;
-    int width = pgmIn1->width;
-
-    pixels = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
-    
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
-            pixels[ix++] = pgmIn1->pixels[il+l];
-    
-    int nPixels = ix;
-    
-    // Sort the pixels
-    pixels = sort(pixels, nPixels);
-    
-    // Store the pixel in the middle of the sorted list
-    pixel = pixels[nPixels/2];
-    
-    free(pixels);
-    
-    return pixel;
-}
-
-//--------------------------------------------------------//
-//--------------    Apply a median filter    -------------//
-//--------------------------------------------------------//
-int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
-{
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, medianKernel);
-}
-
-//--------------------------------------------------------//
-//-------------    Apply an average filter   -------------//
-//--------------------------------------------------------//
-int averagePGM(Pgm *pgmIn, Pgm* pgmOut)
-{
-    // apply a box filter
-    Filter *bxFilter = boxFilter(3,3);
-    printFilter(bxFilter);
-    
-    int ret = convolution2DPGM(pgmIn, pgmOut, bxFilter);
-    
-    freeFilter(&bxFilter);
-    
-    return ret;
 }

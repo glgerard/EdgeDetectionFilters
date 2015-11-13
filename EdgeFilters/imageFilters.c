@@ -7,7 +7,6 @@
 //
 
 #include "imageFilters.h"
-#include "imageBasicOps.h"
 
 //---------------------------------------------------------//
 //------------- Create a new empty filter -----------------//

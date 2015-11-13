@@ -10,11 +10,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <libgen.h>
+#include "helperFunctions.h"
 #include "imageUtilities.h"
 #include "imageFilters.h"
 #include "imageBasicOps.h"
 #include "imageFilterOps.h"
-#include "helperFunctions.h"
+#include "imageContours.h"
 #include "test.h"
 
 #define MAXBUF 4096
@@ -113,7 +114,7 @@ int main(int argc, char** argv)
     
     Pgm* imgOut = newPGM(imgIn->width, imgIn->height, 255);
     
-    applyFilters(imgIn, imgOut, fp);
+    execImageOps(imgIn, imgOut, fp);
     
     // calculate histogram and write it in a file
     calcHist(imgOut);

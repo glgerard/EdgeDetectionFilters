@@ -1,5 +1,5 @@
 //
-//  wrappers.c
+//  imageFilterOps.c
 //  EdgeFilters
 //
 //  Created by Gianluca Gerard on 07/11/15.
@@ -7,10 +7,6 @@
 //
 
 #include "imageFilterOps.h"
-#include "imageFilters.h"
-#include "imageBasicOps.h"
-#include "helperFunctions.h"
-
 
 // Define the Nagao-Matsuyama matrixes
 const static int n0[] = {
@@ -151,85 +147,120 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
     return 0;
 }
 
+
 //--------------------------------------------------------//
-//------ Check an eight neighbour for contour pixels -----//
+//---------- Compute an image submatrix median -----------//
 //--------------------------------------------------------//
-int contour2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
+int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
 {
-    // This function computes the integral of the absolute values of the neighborhood.
-    // If the integral is 0 or max_val*"area of the neighborhood" the central pixel
-    // is not on the contour. Otherwise it is a contour pixel.
-    int sum = 0;
-    int pixel = 0;  // default output value (black, i.e. contour pixel)
-    int max_int = pgmIn1->max_val*(2*borderX+1)*(2*borderY+1);
-    
+    int* pixels;
+    int pixel;
+    int ix = 0;
     int width = pgmIn1->width;
+    
+    pixels = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
     
     // Iterate over all filter pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++)
-            // Compute the integral of the neighborhood
-            sum += abs(pgmIn1->pixels[il+l]);
+            pixels[ix++] = pgmIn1->pixels[il+l];
     
-    if ((sum == 0) || (sum == max_int)) {
-        // The pixel is not a contour pixel and the output value is white
-        pixel = 255;
-    }
+    int nPixels = ix;
     
-    return pixel;
-}
-
-//--------------------------------------------------------//
-//--------------- A simple contour check -----------------//
-//--------------------------------------------------------//
-int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut)
-{
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, contour2DKernel);
-}
-
-//--------------------------------------------------------//
-//-- Check for internal contour pixels with N8 distance --//
-//--------------------------------------------------------//
-int contourN8IntKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
-{
-    int pixel = 255;
-    int min_dist = borderX+borderY;
-    int dist = 0;
-    int bck = pgmIn1->max_val;
+    // Sort the pixels
+    pixels = sort(pixels, nPixels);
     
-    // skip background pixels
-    if  (pgmIn1->pixels[ic] == bck )
-        return 255;
+    // Store the pixel in the middle of the sorted list
+    pixel = pixels[nPixels/2];
     
-    int width = pgmIn1->width;
-    
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++) {
-            // Compute the distance with background pixels
-            if (pgmIn1->pixels[il+l] == bck) {
-                dist = max(abs(k),abs(l));
-                if (dist < min_dist) {
-                    min_dist = dist;
-                }
-            }
-        }
-    
-    // The pixel has unitary distance from the background
-    // therefore it belongs to the contour.
-    if (min_dist == 1) {
-        pixel = 0;
-    }
+    free(pixels);
     
     return pixel;
 }
 
 //--------------------------------------------------------//
-//--------------- Apply a N8 contour check ---------------//
+//--------------    Apply a median filter    -------------//
 //--------------------------------------------------------//
-int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
+int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, contourN8IntKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, medianKernel);
+}
+
+//--------------------------------------------------------//
+//-------------    Apply an average filter   -------------//
+//--------------------------------------------------------//
+int averagePGM(Pgm *pgmIn, Pgm* pgmOut)
+{
+    // apply a box filter
+    Filter *bxFilter = boxFilter(3,3);
+    printFilter(bxFilter);
+    
+    int ret = convolution2DPGM(pgmIn, pgmOut, bxFilter);
+    
+    freeFilter(&bxFilter);
+    
+    return ret;
+}
+
+/** \fn int sharpeningPGM(Pgm* imgIn, Pgm* imgOut)
+ \brief Sharpen an image.
+ Apply as a filter the difference between an identity and a box filter.
+ \param imgIn Pointer to the input PGM image structure.
+ \param imgOut Pointer to the output PGM image structure.
+ */
+int sharpeningPGM(Pgm* imgIn, Pgm* imgOut)
+{
+    Filter* filter;
+    
+    // create a identity filter
+    Filter *idFilter = identityFilter(3,3);
+    
+    // create a box filter
+    Filter *bxFilter = boxFilter(3,3);
+    
+    // sharpening
+    
+    filter = linearAddFilter(idFilter, bxFilter, 2.0, -1.0);
+    freeFilter(&idFilter);
+    freeFilter(&bxFilter);
+    
+    resetPGM(imgOut);
+    
+    convolution2DPGM(imgIn, imgOut, filter);
+    freeFilter(&filter);
+    
+    return 0;
+}
+
+/** \fn int gaussPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
+ \brief Gaussian blur of an image.
+ Apply as a filter two 1D Gaussian filters with the same sigma and matrix size.
+ \param imgIn Pointer to the input PGM image structure.
+ \param imgOut Pointer to the output PGM image structure.
+ \param sigma The sigma of the gaussians.
+ \param dim The dimension of the gaussian filter. If 0 it will default to the nearest odd value close to 6 sigma.
+ */
+int gaussPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
+{
+    Filter* filter;
+    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    
+    // linear X guassian filter
+    filter = gauss1DXFilter(sigma, dim);
+    
+    convolution1DXPGM(imgIn, imgOut1, filter);
+    
+    freeFilter(&filter);
+    
+    // linear Y guassian filter
+    filter = gauss1DYFilter(sigma, dim);
+    
+    convolution1DYPGM(imgOut1, imgOut, filter);
+    
+    freeFilter(&filter);
+    freePGM(&imgOut1);
+    
+    return 0;
 }
 
 //--------------------------------------------------------//
@@ -376,87 +407,6 @@ int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
     return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 1, 1, suppressionKernel);
 }
 
-//--------------------------------------------------------//
-//-------------    A connectivity algorithm   ------------//
-//--------------------------------------------------------//
-int connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, double* kernel, int borderX, int borderY, int ic)
-{
-    if (pgmNL->pixels[ic] == 0)
-        return 0;
-    
-    int width = pgmNL->width;
-    
-    // Iterate over all N8 set in NH pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
-            // There is a pixel in pgmNH connected
-            if (pgmNH->pixels[il+l] != 0)
-                return pgmNL->pixels[ic];
-    
-    return 0;
-}
-
-//--------------------------------------------------------//
-//-------------  Apply a connectivity kernel   -----------//
-//--------------------------------------------------------//
-int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut)
-{
-    return fapplyPGM(pgmNH, pgmNL, pgmOut, NULL, 1, 1, connectivityKernel);
-}
-
-/** \fn int sharpeningPGM(Pgm* imgIn, Pgm* imgOut)
-        \brief Sharpen an image.
-               Apply as a filter the difference between an identity and a box filter.
-        \param imgIn Pointer to the input PGM image structure.
-        \param imgOut Pointer to the output PGM image structure.
- */
-int applySharpening(Pgm* imgIn, Pgm* imgOut)
-{
-    Filter* filter;
-    
-    // create a identity filter
-    Filter *idFilter = identityFilter(3,3);
-    
-    // create a box filter
-    Filter *bxFilter = boxFilter(3,3);
-    
-    // sharpening
-    
-    filter = linearAddFilter(idFilter, bxFilter, 2.0, -1.0);
-    freeFilter(&idFilter);
-    freeFilter(&bxFilter);
-    
-    resetPGM(imgOut);
-
-    convolution2DPGM(imgIn, imgOut, filter);
-    freeFilter(&filter);
-    
-    return 0;
-}
-
-int applyGauss(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
-{
-    Filter* filter;
-    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    
-    // linear X guassian filter
-    filter = gauss1DXFilter(sigma, dim);
-    
-    convolution1DXPGM(imgIn, imgOut1, filter);
-    
-    freeFilter(&filter);
-
-    // linear Y guassian filter
-    filter = gauss1DYFilter(sigma, dim);
-    
-    convolution1DYPGM(imgOut1, imgOut, filter);
-
-    freeFilter(&filter);
-    freePGM(&imgOut1);
-    
-    return 0;
-}
-
 int applySobel(Pgm* imgIn, Pgm* imgOut, int eval)
 {
     Filter* filter;
@@ -541,7 +491,7 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, 
     Pgm* imgOutMod = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
     Pgm* imgOutPhi = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
 
-    applyGauss(imgIn, imgOut, sigma, dim);
+    gaussPGM(imgIn, imgOut, sigma, dim);
     
     Filter* gx = sobelXFilter();
     Filter* gy = sobelYFilter();
@@ -609,7 +559,7 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, 
 //--------------------------------------------------------//
 //-------------  Apply a sequence of filters  ------------//
 //--------------------------------------------------------//
-int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
+int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
 {
     char buffer[64];
     char *ch, *cmdline;
@@ -663,7 +613,7 @@ int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
         } else if (strcmp(ch,"nagao")==0) {
             nagaoPGM(pgmTmp, pgmOut);
         } else if (strcmp(ch,"sharpening")==0) {
-            applySharpening(pgmTmp, pgmOut);
+            sharpeningPGM(pgmTmp, pgmOut);
         } else if (strcmp(ch, "prewitt")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -699,7 +649,7 @@ int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
             }
             else
                 iarg = atoi(ch);
-            applyGauss(pgmTmp, pgmOut, farg, iarg);
+            gaussPGM(pgmTmp, pgmOut, farg, iarg);
         } else if (strcmp(ch, "dog")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
