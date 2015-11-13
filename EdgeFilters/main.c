@@ -12,7 +12,8 @@
 #include <libgen.h>
 #include "imageUtilities.h"
 #include "imageFilters.h"
-#include "imageOperations.h"
+#include "imageBasicOps.h"
+#include "imageFilterOps.h"
 #include "helperFunctions.h"
 #include "test.h"
 

@@ -49,11 +49,4 @@ Filter* gauss1DYFilter(double sigma, int height);
 Filter* gauss2DFilter(double sigma, int dim);
 Filter* DoGFilter(double sigma, int dim);
 
-//---------------------------------------------------------//
-//---------------------   Filters Ops   -------------------//
-//---------------------------------------------------------//
-int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
-int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
-int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
-
 #endif /* imageFilters_h */

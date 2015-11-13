@@ -42,21 +42,10 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX
             int (*func)(Pgm*, Pgm*, double*, int, int, int));
 
 //---------------------------------------------------------//
-//--------------- Noise  operations for PGM ---------------//
+//---------------------   Convolutions  -------------------//
 //---------------------------------------------------------//
-int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range);
-int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double prob);
-
-//---------------------------------------------------------//
-//------- Contour/Edge Detection operations for PGM -------//
-//---------------------------------------------------------//
-int contour2DPGM(Pgm* pgmIn, Pgm* pgmOut);
-int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut);
-int op39PGM(Pgm *pgmIn, Pgm* pgmOut);
-int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut);
-int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut);
-int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut);
-
-int applyFilters(Pgm *pgmIn, Pgm* pgmOut, FILE *fp);
+int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
+int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter);
 
 #endif /* imageOperations_h */

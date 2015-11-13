@@ -8,7 +8,8 @@
 
 #include "test.h"
 #include "imageFilters.h"
-#include "imageOperations.h"
+#include "imageBasicOps.h"
+#include "imageFilterOps.h"
 
 #define MAXBUF 4096
 
