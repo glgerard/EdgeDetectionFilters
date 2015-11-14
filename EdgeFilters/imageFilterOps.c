@@ -728,17 +728,11 @@ int cedPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim, int threshold_low, in
     Pgm *imgNH = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     thresholdPGM(pgmOut, imgNH, threshold_high);
     
-    writePGM(imgNH, "imgNH.pgm");
-    
     Pgm *imgNLshadow = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     thresholdPGM(pgmOut, imgNLshadow, threshold_low);
 
-    writePGM(imgNLshadow, "imgNL.pgm");
-
     Pgm *imgNL = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     linearAddPGM(imgNLshadow, imgNH, 1.0, -1.0, imgNL);
-
-    writePGM(imgNL, "imgNL-.pgm");
     
     int change = 1;
     
