@@ -1,10 +1,10 @@
-//
-//  imageFilterOps.c
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 07/11/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file imageFilterOps.c
+ *  \brief All the filter operations (blurs, noises, sharpening, edge detection) are implemented in this file.
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 07/11/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #include "imageFilterOps.h"
 
@@ -76,18 +76,31 @@ const static int* nagao[] = {
     n0, n1, n2, n3, n4, n5, n6, n7, n8
 };
 
-const int nagaoSize[9] = {9, 7, 7, 7, 7, 7, 7, 7, 7};
+// Number of 1's in each Nagao matrix
+const static int nagaoSize[9] = {9, 7, 7, 7, 7, 7, 7, 7, 7};
 
-//--------------------------------------------------------//
-//------------------ Add uniform noise -------------------//
-//--------------------------------------------------------//
+/*! \fn int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
+ * \brief Add uniform noise to the image \a pgmIn. The final result is stored in \a pgmOut.
+ *
+ * Add to each pixel of the image a value in the interval [-range, +range] with uniform density.
+ * \param imgIn Pointer to the input PGM image structure.
+ * \param imgOut Pointer to the output PGM image structure.
+ * \param range The absolute max value of the range.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
 {
     int randVal;
     
-    if(!pgmIn || !pgmOut)
+    if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -113,14 +126,26 @@ int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
     return 0;
 }
 
-//--------------------------------------------------------//
-//--------------- Add salt & pepper noise ----------------//
-//--------------------------------------------------------//
+/*! \fn int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
+ * \brief Add Salt & Pepper noise to the image \a pgmIn. The final result is stored in \a pgmOut.
+ *
+ * Superimpose a percentage 'density' of white or black pixels onto the image.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \param density The percentage of pixels that will become black or white with equal probability.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
 {
-    if(!pgmIn || !pgmOut)
+    if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -147,22 +172,32 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
     return 0;
 }
 
-
-//--------------------------------------------------------//
-//---------- Compute an image submatrix median -----------//
-//--------------------------------------------------------//
-int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
+/*! \fn medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+ * \brief Return the median pixel of an image subarray of dimensions (dimX, dimY).
+ *
+ * \param pgmIn1 Pointer to the Pgm structure of the input image.
+ * \param pgmIn2 Not used.
+ * \param kernel Not used.
+ * \param dimX The number of columns of the image subarray.
+ * \param dimY The number of rows of the image subarray.
+ * \param ic The linear index of the central subarray pixel in \a pgmIn1.
+ * \return The value of the median pixel.
+ */
+int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
 {
     int* pixels;
     int pixel;
     int ix = 0;
     int width = pgmIn1->width;
     
-    pixels = calloc((2*borderX+1)*(2*borderY+1), sizeof(int));
+    pixels = calloc(dimX*dimY, sizeof(int));
+    
+    int spanX = dimX/2;
+    int spanY = dimY/2;
     
     // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
+    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (int l=-spanX; l <= spanX; l++)
             pixels[ix++] = pgmIn1->pixels[il+l];
     
     int nPixels = ix;
@@ -178,22 +213,32 @@ int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int bord
     return pixel;
 }
 
-//--------------------------------------------------------//
-//--------------    Apply a median filter    -------------//
-//--------------------------------------------------------//
+/*! \fn int medianPGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Apply a median filter to the image \a pgmIn. The final result is stored in \a pgmOut.
+ *
+ * For each pixel of \a pgmIn compute the median of a 3x3 subarray centered at the pixel.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int medianPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, medianKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 3, 3, medianKernel);
 }
 
-//--------------------------------------------------------//
-//-------------    Apply an average filter   -------------//
-//--------------------------------------------------------//
+
+/*! \fn int averagePGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Apply a box filter to the image \a pgmIn. The final result is stored in \a pgmOut.
+ *
+ * For each pixel of \a pgmIn compute the average of a 3x3 subarray centered at the pixel.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int averagePGM(Pgm *pgmIn, Pgm* pgmOut)
 {
     // apply a box filter
     Filter *bxFilter = boxFilter(3,3);
-    printFilter(bxFilter);
     
     int ret = convolution2DPGM(pgmIn, pgmOut, bxFilter);
     
@@ -202,15 +247,27 @@ int averagePGM(Pgm *pgmIn, Pgm* pgmOut)
     return ret;
 }
 
-/** \fn int sharpeningPGM(Pgm* imgIn, Pgm* imgOut)
- \brief Sharpen an image.
- Apply as a filter the difference between an identity and a box filter.
- \param imgIn Pointer to the input PGM image structure.
- \param imgOut Pointer to the output PGM image structure.
+/*! \fn int sharpeningPGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Sharpen an image \a pgmIn. The final result is stored in \a pgmOut.
+ *
+ * Apply a filter (the difference between an identity and a box filter) to the image stored in \a pgmIn.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
-int sharpeningPGM(Pgm* imgIn, Pgm* imgOut)
+int sharpeningPGM(Pgm* pgmIn, Pgm* pgmOut)
 {
-    Filter* filter;
+    if(!pgmIn)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
+        return -1;
+    }
     
     // create a identity filter
     Filter *idFilter = identityFilter(3,3);
@@ -219,43 +276,56 @@ int sharpeningPGM(Pgm* imgIn, Pgm* imgOut)
     Filter *bxFilter = boxFilter(3,3);
     
     // sharpening
-    
-    filter = linearAddFilter(idFilter, bxFilter, 2.0, -1.0);
+    Filter* filter = linearAddFilter(idFilter, bxFilter, 2.0, -1.0);
     freeFilter(&idFilter);
     freeFilter(&bxFilter);
     
-    resetPGM(imgOut);
+    resetPGM(pgmOut);
+    convolution2DPGM(pgmIn, pgmOut, filter);
     
-    convolution2DPGM(imgIn, imgOut, filter);
     freeFilter(&filter);
     
     return 0;
 }
 
-/** \fn int gaussPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
- \brief Gaussian blur of an image.
- Apply as a filter two 1D Gaussian filters with the same sigma and matrix size.
- \param imgIn Pointer to the input PGM image structure.
- \param imgOut Pointer to the output PGM image structure.
- \param sigma The sigma of the gaussians.
- \param dim The dimension of the gaussian filter. If 0 it will default to the nearest odd value close to 6 sigma.
+/*! \fn int gaussPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
+ * \brief Gaussian blur of an image \a pgmIn.
+ *
+ * Apply as a filter two 1D Gaussian filters with the same \a sigma and matrix linear dimension \a dim.
+ * \param pgmIn Pointer to the input Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \param sigma The sigma of the gaussians.
+ * \param dim The dimension of the gaussian filter. If 0 it will default to the nearest odd value close to 6 sigma.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
-int gaussPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
+int gaussPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
 {
+    if(!pgmIn)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
+        return -1;
+    }
+    
     Filter* filter;
-    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    Pgm* imgOut1 = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     
     // linear X guassian filter
     filter = gauss1DXFilter(sigma, dim);
     
-    convolution1DXPGM(imgIn, imgOut1, filter);
+    convolution1DXPGM(pgmIn, imgOut1, filter);
     
     freeFilter(&filter);
     
     // linear Y guassian filter
     filter = gauss1DYFilter(sigma, dim);
     
-    convolution1DYPGM(imgOut1, imgOut, filter);
+    convolution1DYPGM(imgOut1, pgmOut, filter);
     
     freeFilter(&filter);
     freePGM(&imgOut1);
@@ -263,31 +333,42 @@ int gaussPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
     return 0;
 }
 
-//--------------------------------------------------------//
-//-------------    Compute the 3/9 operator   ------------//
-//--------------------------------------------------------//
-int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
+/*! \fn op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+ * \brief Return the result of applying the 3/9 operator to a pixel of \a pgmIn1.
+ *
+ * \param pgmIn1 Pointer to the Pgm structure of the input image.
+ * \param pgmIn2 Not used.
+ * \param kernel Not used.
+ * \param dimX Not used.
+ * \param dimY Not used.
+ * \param ic The linear index of the central subarray pixel in \a pgmIn1.
+ * \return The result of the 3/9 operator or 0 if the integral of the subarray is 0.
+ */
+int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
 {
     int pixels[9];
     int I[9];
-    int sum = 0;
+    const double K = 255*1.5;
+    const double P0 = 1.0/3;
     
-    borderX = 1;
-    borderY = 1;
+    // Define how far to move to the left, right, top and bottom
+    // in to match the 3x3 matrixes of the 3/9 operator
+    int spanX = 1;
+    int spanY = 1;
     
     int width = pgmIn1->width;
     
-    int total = 0;
+    int Pi = 0;  // The integral of the image subarray
     int ix = 0;
     
     // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++) {
+    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (int l=-spanX; l <= spanX; l++) {
             pixels[ix] = pgmIn1->pixels[il+l];
-            total += pixels[ix++];
+            Pi += pixels[ix++];
         }
     
-    if (total == 0)
+    if (Pi == 0)
         return 0;
     
     // remapping
@@ -302,28 +383,43 @@ int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int border
     I[7] = pixels[8];
     I[8] = pixels[4];
     
-    double max = 0;
+    int Pik = 0;
+    int Pij = 0;
     for (int j=0; j<9; j++) {
-        sum = I[mod((j-1),9)] + I[j] + I[mod((j+1),9)];
-        if (sum > max)
-            max = sum;
+        Pij = I[mod((j-1),9)] + I[j] + I[mod((j+1),9)];
+        if (Pij > Pik)
+            Pik = Pij;
     }
     
-    return (int)floor(382.5*(max/total-1.0/3));
+    // Return the normalized maxima among the 8 parameters Pjj
+    return (int)floor(K*((double)Pik/Pi-P0));
 }
 
-//--------------------------------------------------------//
-//--------------      Apply a 3/9 filter     -------------//
-//--------------------------------------------------------//
+/*! \fn int op39PGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Filter an image \a pgmIn with the 3/9 operator. The final result is stored in \a pgmOut.
+ *
+ * Apply a 3/9 operator filter to the image stored in \a pgmIn.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 1, 1, op39Kernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 0, 0, op39Kernel);
 }
 
-//--------------------------------------------------------//
-//---------- Compute the Nagao-Matsuyama filter ----------//
-//--------------------------------------------------------//
-int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
+/*! \fn nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+ * \brief Return the result of applying the Nagao-Matsuyama filter to a pixel of \a pgmIn1.
+ *
+ * \param pgmIn1 Pointer to the Pgm structure of the input image.
+ * \param pgmIn2 Not used.
+ * \param kernel Not used.
+ * \param dimX Not used.
+ * \param dimY Not used.
+ * \param ic The linear index of the central subarray pixel in \a pgmIn1.
+ * \return The result of the Nagao-Matsuyama filter.
+ */
+int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
 {
     const int *np = NULL;
     int pixelVals[9];
@@ -332,25 +428,30 @@ int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borde
     double min_var = 585225;
     double sel_mean = 0;
     
-    borderX = 2;
-    borderY = 2;
+    // Define how far to move to the left, right, top and bottom
+    // in to match the 5x5 Nagao matrixes
+    int spanX = 2;
+    int spanY = 2;
     int width = pgmIn1->width;
     
+    // Iterates over all Nagao matrixes
     for (int n=0; n<9; n++) {
         np = nagao[n];
         ix = 0;
         in = 0;
         // Iterate over all filter pixels
-        for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-            for (int l=-borderX; l <= borderX; l++, ix++) {
+        for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+            for (int l=-spanX; l <= spanX; l++, ix++) {
                 if (np[ix] == 1) {
                     pixelVals[in] = pgmIn1->pixels[il+l]*np[ix];
                     in++;
                 }
             }
         
+        // Compute the variance
         v = var(pixelVals,nagaoSize[n]);
         
+        // Select the mean of the array with the minimum variance
         if (v < min_var) {
             min_var = v;
             sel_mean = mean(pixelVals,nagaoSize[n]);
@@ -360,194 +461,298 @@ int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borde
     return (int)floor(sel_mean);
 }
 
-//--------------------------------------------------------//
-//--------------    Apply a Nagao filter     -------------//
-//--------------------------------------------------------//
+/*! \fn int nagaoPGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Filter an image \a pgmIn with the Nagao-Matsuyama filter. The final result is stored in \a pgmOut.
+ *
+ * Apply a Nagao-Matsuyama filter to the image stored in \a pgmIn.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 2, 2, nagaoKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 0, 0, nagaoKernel);
 }
 
-const int neighbors[] = {
+// These are the pairs of neighbors in a 3x3 array to confront with
+// the central pixel to find the maximum in each quadrant.
+const static int neighbors[] = {
     1, 7,
     0, 8,
     3, 5,
     2, 6
 };
 
-//--------------------------------------------------------//
-//-------------    A suppression algorithm    ------------//
-//--------------------------------------------------------//
-int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int borderX, int borderY, int ic)
+/*! \fn suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int dimX, int dimY, int ic)
+ * \brief Return the result of applying non-maximum suppression to a pixel of \a pgmIn1.
+ *
+ * \param pgmMod Pointer to the Pgm structure containing the modulus component.
+ * \param pgmPhi Pointer to the Pgm structure containing the phase component.
+ * \param kernel Not used.
+ * \param dimX Not used.
+ * \param dimY Not used.
+ * \param ic The linear index of the central subarray pixel in \a pgmIn1.
+ * \return The result the result of non-maximum suppression.
+ */
+int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int dimX, int dimY, int ic)
 {
     int pixels[9];
     int ix = 0;
     
     int width = pgmMod->width;
     
-    // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++) {
+    // Define the left, right, top and bottom span from the
+    // center to match the 3x3 pixels matrix
+    int spanX = 1;
+    int spanY = 1;
+    
+    // Copy the image pixels in a local pixels array
+    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (int l=-spanX; l <= spanX; l++) {
             pixels[ix++] = pgmMod->pixels[il+l];
         }
     
+    // Compute the quadrant of the phase of the central image pixel
     int q = quadrant((int)(180.0*pgmPhi->pixels[ic]/127));
     
+    // Check if the central pixel is the maximum along the direction
+    // perpendicular to the orientation of the gradient
     if((pixels[4] >= pixels[neighbors[2*q]]) && (pixels[4] >= pixels[neighbors[2*q+1]]))
         return pixels[4];
     
     return 0;
 }
 
-//--------------------------------------------------------//
-//-------------  Apply a suppression kernel   ------------//
-//--------------------------------------------------------//
+/*! \fn int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
+ * \brief Filter the image \a pgmMod with non-maximum suppression. The final result is stored in \a pgmOut.
+ *
+ * Apply a non-maximum suppression filter to the image stored in \a pgmMod. This array typically contains the magnitude
+ * of the gradient of an image. The orientation of the gradient is stored instead in \a pgmPhi.
+ * \param pgmMod Pointer to the PGM image structure with the magnitude component.
+ * \param pgmPhi Pointer to the PGM image structure with the phase component.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
 {
-    return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 1, 1, suppressionKernel);
+    return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 0, 0, suppressionKernel);
 }
 
-int applySobel(Pgm* imgIn, Pgm* imgOut, int eval)
+/*! \fn int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
+ * \brief Filter the image \a pgmIn with two Sobel filters alogn the vertical and horizontal direction.
+ *        Returns either the magnitute or the phase based on \a phase.
+ *
+ * Apply the vertical and horizontal Sobel filters and returns the magnitute if \a phase is 0
+ * or the phase if \a phase is 1.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \param phase Returns the phase if set to 1. Otherwise it returns the magnitude.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
+int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
 {
-    Filter* filter;
-    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    Pgm* imgOut2 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    if(!pgmIn)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
     
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
+        return -1;
+    }
+    
+    Filter* filter;
+    
+    Pgm* gx = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     // apply a sobel horizontal filter
     filter = sobelXFilter();
-    convolution2DPGM(imgIn, imgOut1, filter);
+    convolution2DPGM(pgmIn, gx, filter);
     freeFilter(&filter);
     
+    Pgm* gy = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     // apply a sobel vertical filter
     filter = sobelYFilter();
-    convolution2DPGM(imgIn, imgOut2, filter);
+    convolution2DPGM(pgmIn, gy, filter);
     freeFilter(&filter);
     
     // compute the module of the two images with the
     // applied sobel filters
-    resetPGM(imgOut);
+    resetPGM(pgmOut);
     
-    if (eval == 0) {
-        modulePGM(imgOut1, imgOut2, imgOut);
+    if (phase == 1) {
+        phasePGM(gx, gy, pgmOut);
     } else
-        phasePGM(imgOut1, imgOut2, imgOut);
+        modulePGM(gx, gy, pgmOut);
     
-    freePGM(&imgOut1);
-    freePGM(&imgOut2);
+    freePGM(&gx);
+    freePGM(&gy);
     
     return 0;
 }
 
-int applyPrewitt(Pgm* imgIn, Pgm* imgOut, int eval)
+/*! \fn int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
+ * \brief Filter the image \a pgmIn with two Prewitt filters alogn the vertical and horizontal direction.
+ *        Returns either the magnitute or the phase based on \a phase.
+ *
+ * Apply the vertical and horizontal Prewitt filters and returns the magnitute if \a phase is 0
+ * or the phase if \a phase is 1.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \param phase Returns the phase if set to 1. Otherwise it returns the magnitude.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
+int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
 {
-    Filter* filter;
-    Pgm* imgOut1 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    Pgm* imgOut2 = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    if(!pgmIn)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
     
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
+        return -1;
+    }
+    
+    Filter* filter;
+    
+    Pgm* gx = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     // apply a sobel horizontal filter
     filter = prewittXFilter();
-    convolution2DPGM(imgIn, imgOut1, filter);
+    convolution2DPGM(pgmIn, gx, filter);
     freeFilter(&filter);
     
+    Pgm* gy = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     // apply a sobel vertical filter
     filter = prewittYFilter();
-    convolution2DPGM(imgIn, imgOut2, filter);
+    convolution2DPGM(pgmIn, gy, filter);
     freeFilter(&filter);
     
     // compute the module of the two images with the
     // applied sobel filters
-    resetPGM(imgOut);
+    resetPGM(pgmOut);
     
-    if (eval == 0) {
-        modulePGM(imgOut1, imgOut2, imgOut);
+    if (phase == 0) {
+        modulePGM(gx, gy, pgmOut);
     } else
-        phasePGM(imgOut1, imgOut2, imgOut);
+        phasePGM(gx, gy, pgmOut);
     
-    freePGM(&imgOut1);
-    freePGM(&imgOut2);
+    freePGM(&gx);
+    freePGM(&gy);
     
     return 0;
 }
 
-int applyDoG(Pgm* imgIn, Pgm* imgOut, double sigma, int dim)
+/*! \fn dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
+ * \brief Filter the image \a pgmIn with two Prewitt filters alogn the vertical and horizontal direction.
+ *        Returns either the magnitute or the phase based on \a phase.
+ *
+ * Apply the vertical and horizontal Prewitt filters and returns the magnitute if \a phase is 0
+ * or the phase if \a phase is 1.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \param sigma The external sigma of the DoG filter. The internal sigma is set to \a sigma / 1.66 .
+ * \param dim The rows and columns of the DoG filter. If set to 0 then it will be the smallest odd next to 6 \a sigma.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
+int dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
 {
+    if(!pgmIn)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
+        return -1;
+    }
+    
     Filter* filter;
     
     fprintf(stderr, "\nDoG filtering (sigma = %f)\n",sigma);
     filter = DoGFilter(sigma, dim);
     
-    resetPGM(imgOut);
-    convolution2DPGM(imgIn, imgOut, filter);
+    resetPGM(pgmOut);
+    convolution2DPGM(pgmIn, pgmOut, filter);
     
     freeFilter(&filter);
     
     return 0;
 }
 
-int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, int threshold_high)
+/*! \fn cedPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, int threshold_high)
+ * \brief Filter the image \a pgmIn with two Prewitt filters alogn the vertical and horizontal direction.
+ *        Returns either the magnitute or the phase based on \a phase.
+ *
+ * Apply the vertical and horizontal Prewitt filters and returns the magnitute if \a phase is 0
+ * or the phase if \a phase is 1.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \param sigma The external sigma of the DoG filter. The internal sigma is set to \a sigma / 1.66 .
+ * \param dim The rows and columns of the DoG filter. If set to 0 then it will be the smallest odd next to 6 \a sigma.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
+int cedPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim, int threshold_low, int threshold_high)
 {    
-    Pgm* imgOutX = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    Pgm* imgOutY = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    Pgm* imgOutMod = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    Pgm* imgOutPhi = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    Pgm* imgOutX = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    Pgm* imgOutY = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    Pgm* imgOutMod = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    Pgm* imgOutPhi = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
 
-    gaussPGM(imgIn, imgOut, sigma, dim);
+    gaussPGM(pgmIn, pgmOut, sigma, dim);
     
     Filter* gx = sobelXFilter();
     Filter* gy = sobelYFilter();
     
-    convolution2DPGM(imgOut, imgOutX, gx);
-    convolution2DPGM(imgOut, imgOutY, gy);
+    convolution2DPGM(pgmOut, imgOutX, gx);
+    convolution2DPGM(pgmOut, imgOutY, gy);
     
     modulePGM(imgOutX, imgOutY, imgOutMod);
     phasePGM(imgOutX, imgOutY, imgOutPhi);
     
-    resetPGM(imgOut);
+    resetPGM(pgmOut);
    
-    suppressionPGM(imgOutMod, imgOutPhi, imgOut);
+    suppressionPGM(imgOutMod, imgOutPhi, pgmOut);
 
     freePGM(&imgOutX);
     freePGM(&imgOutY);
     freePGM(&imgOutMod);
     freePGM(&imgOutPhi);
 
-    Pgm *imgNH = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-    Pgm *imgNLshadow = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
-
-    thresholdPGM(imgOut, imgNH, threshold_high);
-    thresholdPGM(imgOut, imgNLshadow, threshold_low);
+    // Find strong and weak edges with thresholding
+    Pgm *imgNH = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    thresholdPGM(pgmOut, imgNH, threshold_high);
     
-    Pgm *imgNL = newPGM(imgIn->width, imgIn->height, imgIn->max_val);
+    writePGM(imgNH, "imgNH.pgm");
+    
+    Pgm *imgNLshadow = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
+    thresholdPGM(pgmOut, imgNLshadow, threshold_low);
+
+    writePGM(imgNLshadow, "imgNL.pgm");
+
+    Pgm *imgNL = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     linearAddPGM(imgNLshadow, imgNH, 1.0, -1.0, imgNL);
 
-    Histogram *hist;
-    int change = 0;
-    int size = imgNH->width*imgNH->height;
+    writePGM(imgNL, "imgNL-.pgm");
     
-    while (!change) {
-        resetPGM(imgNLshadow);
-        connectivityPGM(imgNH, imgNL, imgNLshadow);
+    int change = 1;
+    
+    // Find 8-connected pixels in imgNL by a repeated search
+
+    for (int i=0; (i<50) && change; i++) {
+        connectivityPGM(imgNH, imgNL, pgmOut);
         
-        resetPGM(imgOut);
-        linearAddPGM(imgNH, imgNLshadow, 1.0, 1.0, imgOut);
+        change = comparePGM(imgNH, pgmOut);
         
-        copyPGM(imgNH, imgNLshadow);
-        
-        thresholdPGM(imgOut, imgNH, threshold_high);
-        
-        linearAddPGM(imgNH, imgNLshadow, 1.0, -1.0, imgOut);
-        
-        hist = histogramPGM(imgOut);
-        
-        change = hist->channels[0] == size;
-        
-        printf("%d\n", hist->channels[0]);
-        
+        copyPGM(pgmOut, imgNH);
     }
-
     
-    copyPGM(imgNH, imgOut);
-
+    copyPGM(imgNH, pgmOut);
     
     freePGM(&imgNLshadow);
     freePGM(&imgNH);
@@ -556,10 +761,37 @@ int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, 
     return 0;
 }
 
-//--------------------------------------------------------//
-//-------------  Apply a sequence of filters  ------------//
-//--------------------------------------------------------//
-int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
+/*! \fn execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
+ * \brief Filter the image \a pgmIn with the filters listed in file \a fp.
+ *
+ * The file \a fp contains a list of filters, one per line, that will be applied in sequence to
+ * the image pointed by \a pgmIn. The output will be stored in the Pgm structure pointed by
+ * \a pgmOut. Certain filters have optional parameters.
+ *
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \param fp Pointer to a file with the list of filters.
+ *
+ * \par List of implemented filters
+ *
+ *   - threshold [threshold_value (default 0)]
+ *   - uniform_noise [range_value (default 32)]
+ *   - salt_n_pepper [density (default 0.05)]
+ *   - normalize
+ *   - equalize
+ *   - median
+ *   - average
+ *   - internal_contour
+ *   - operator_39
+ *   - nagao
+ *   - sharpening
+ *   - prewitt [mod|phase (default mod)]
+ *   - sobel [mod|phase (default mod)]
+ *   - gauss [sigma (default 1)] [dim (default 0)]
+ *   - dog [sigma (default 1)] [dim (default 0)]
+ *   - ced [sigma (default sqrt(2))] [threshold (default 25)]
+ */
+void execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
 {
     char buffer[64];
     char *ch, *cmdline;
@@ -624,7 +856,7 @@ int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
                 }
                 else
                     iarg = 0;
-            applyPrewitt(pgmTmp, pgmOut, iarg);
+            prewittPGM(pgmTmp, pgmOut, iarg);
         } else if (strcmp(ch, "sobel")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -635,7 +867,7 @@ int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
                 }
                 else
                     iarg = 0;
-            applySobel(pgmTmp, pgmOut, iarg);
+            sobelPGM(pgmTmp, pgmOut, iarg);
         } else if (strcmp(ch, "gauss")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -663,7 +895,7 @@ int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
             }
             else
                 iarg = atoi(ch);
-            applyDoG(pgmTmp, pgmOut, farg, iarg);
+            dogPGM(pgmTmp, pgmOut, farg, iarg);
         } else if (strcmp(ch, "ced")==0) {
             ch = strtok(NULL, " ");
             if (ch==NULL) {
@@ -677,11 +909,11 @@ int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp)
             }
             else
                 iarg = atoi(ch);
-            applyCED(pgmTmp, pgmOut, farg, 0, iarg, iarg*3);
+            cedPGM(pgmTmp, pgmOut, farg, 0, iarg, iarg*3);
         }
         
     }
     
     freePGM(&pgmTmp);
-    return 0;
+    return;
 }

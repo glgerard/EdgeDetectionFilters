@@ -10,6 +10,7 @@
 #define imageContours_h
 
 #include <stdio.h>
+#include <sys/time.h>
 #include "helperFunctions.h"
 #include "imageUtilities.h"
 #include "imageFilters.h"

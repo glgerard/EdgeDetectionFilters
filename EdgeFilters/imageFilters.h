@@ -17,6 +17,13 @@
 #include <math.h>
 #include "imageUtilities.h"
 
+/*! \def smallestOdd(x)
+ *    \brief Find the smallestOdd next to \a x
+ *
+ *    It returns \a x if it is odd, \a x - 1 if it is even.
+ */
+#define smallestOdd(x) x%2 == 1? x: x-1
+
 typedef struct
 {
     int width;

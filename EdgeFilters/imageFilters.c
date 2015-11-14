@@ -169,7 +169,7 @@ Filter* gauss1DFilter(double sigma, int dim, Filter *filter)
 Filter* gauss1DXFilter(double sigma, int width)
 {
     if (width == 0)
-        width = (int)(2*sigma)*2+1;
+        width = smallestOdd((int)(6*sigma));
     
     Filter* filter = newFilter(width,1);
     
@@ -182,7 +182,7 @@ Filter* gauss1DXFilter(double sigma, int width)
 Filter* gauss1DYFilter(double sigma, int height)
 {
     if (height == 0)
-        height = (int)(2*sigma)*2+1;
+        height = smallestOdd((int)(6*sigma));
 
     Filter* filter = newFilter(1,height);
     
@@ -200,7 +200,7 @@ Filter* gauss2DFilter(double sigma, int dim)
     double gc0 = M_1_PI/(2*sigma2);
 
     if (dim == 0)
-        dim = (int)(2*sigma)*2+1;
+        dim = smallestOdd((int)(6*sigma));
     
     Filter* filter = newFilter(dim,dim);
 
@@ -225,7 +225,7 @@ Filter* DoGFilter(double sigma, int dim)
     double sigmaInt = sigma/1.66;
     
     if (dim == 0)
-        dim = (int)(2*sigma)*2+1;
+        dim = (int)(4*sigma)+1;
     
     Filter *gaussExtFilter = gauss2DFilter(sigmaExt, dim);
     Filter *gaussIntFilter = gauss2DFilter(sigmaInt, dim);

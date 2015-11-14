@@ -1,10 +1,10 @@
-//
-//  wrappers.h
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 07/11/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file wrappers.h
+ *  \brief All the filter operations (blurs, noises, sharpening, edge detection) are implemented in this file.
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 07/11/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #ifndef imageFilterOps_H
 #define imageFilterOps_H
@@ -39,11 +39,11 @@ int op39PGM(Pgm *pgmIn, Pgm* pgmOut);
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut);
 int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut);
 
-int applySobel(Pgm* pgmIn, Pgm* pgmOut, int iarg);
-int applyPrewitt(Pgm* imgIn, Pgm* imgOut, int eval);
-int applyDoG(Pgm* imgIn, Pgm* imgOut, double sigma, int dim);
-int applyCED(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int thresholdRatio);
+int sobelPGM(Pgm* imgIn, Pgm* imgOut, uint8_t phase);
+int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase);
+int dogPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim);
+int cedPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int thresholdRatio);
 
-int execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp);
+void execImageOps(Pgm *pgmIn, Pgm* pgmOut, FILE *fp);
 
 #endif /* imageFilterOps_H */

@@ -68,7 +68,7 @@ int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
         pixel = pgmIn->pixels[i];
         // Set the output value to black or white if it is
         // below or above the threshold
-        if (pixel>threshold) {
+        if (pixel>=threshold) {
             pixel=255;
         }
         if (pixel<threshold) {
@@ -108,6 +108,28 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
     }
     
     pgmOut->max_val = max_val;
+    
+    return 0;
+}
+
+//--------------------------------------------------------//
+//----------------- Compare two images -------------------//
+//--------------------------------------------------------//
+int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2)
+{
+    if(!pgmOp1 | !pgmOp2)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmOp1->width;
+    int height = pgmOp1->height;
+    
+    // Iterate over all pixels
+    for (int i = 0; i < width*height; i++)
+        if (pgmOp1->pixels[i] != pgmOp2->pixels[i])
+            return 1;
     
     return 0;
 }
@@ -202,7 +224,8 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX
     }
     
     // Timestamp
-    time_t t0 = time(0);
+    struct timeval tvStart;
+    gettimeofday(&tvStart, NULL);
 
     // Move to the first useful interior pixel
     ic = borderY*width+borderX;
@@ -229,9 +252,11 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX
     pgmOut->max_val = max_val;
     
     // Timestamp
-    time_t t1 = time(0);
-    double datetime_diff_ms = difftime(t1, t0) * 1000.;
-    fprintf(stderr, "\nElapsed time (msec): %f\n", datetime_diff_ms);
+    struct timeval tvStop;
+    gettimeofday(&tvStop, NULL);
+    
+    fprintf(stderr, "\nElapsed time (msec): %f\n", ((double)tvStop.tv_sec - (double)tvStart.tv_sec) * 1000 +
+            ((double)tvStop.tv_usec - (double)tvStart.tv_usec) / 1000);
     
     return 0;
 }

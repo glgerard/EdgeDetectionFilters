@@ -93,21 +93,19 @@ int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
 //--------------------------------------------------------//
 //-------------    A connectivity algorithm   ------------//
 //--------------------------------------------------------//
-int connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, double* kernel, int borderX, int borderY, int ic)
+void connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, Pgm* pgmOut, int borderX, int borderY, int ic)
 {
-    if (pgmNL->pixels[ic] == 0)
-        return 0;
-    
+    if ((pgmOut->pixels[ic] = pgmNH->pixels[ic])==0)
+        return;
+
     int width = pgmNL->width;
     
-    // Iterate over all N8 set in NH pixels
+    // Iterate over all N8 set in NL pixels
     for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
         for (int l=-borderX; l <= borderX; l++)
-            // There is a pixel in pgmNH connected
-            if (pgmNH->pixels[il+l] != 0)
-                return pgmNL->pixels[ic];
-    
-    return 0;
+            // If the pixel is different from 0 it is connected
+            if (pgmNL->pixels[il+l] != 0)
+                pgmOut->pixels[il+l] = 255;
 }
 
 //--------------------------------------------------------//
@@ -115,5 +113,50 @@ int connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, double* kernel, int borderX, int 
 //--------------------------------------------------------//
 int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut)
 {
-    return fapplyPGM(pgmNH, pgmNL, pgmOut, NULL, 1, 1, connectivityKernel);
+    int ic; // the index of the central pixel in the source image
+    
+    if(!pgmNH || !pgmNL)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    int width = pgmNH->width;
+    int height = pgmNH->height;
+    
+    int spanX = 1;
+    int spanY = 1;
+    
+    // Timestamp
+    struct timeval tvStart;
+    gettimeofday(&tvStart, NULL);
+    
+    // Move to the first useful interior pixel
+    ic = spanY*width+spanX;
+    D(fprintf(stderr,"w=%d,h=%d\n",width,height));
+    D(fprintf(stderr,"bw=%d,bh=%d\n",borderX,borderY));
+    
+    // Loop over all internal source image pixels
+    for (int row = spanY; row < height-spanY; row++, ic += spanX*2) {
+        D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
+        for (int col = spanX; col < width-spanX; col++, ic++) {
+            D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
+            
+            // Apply the function to each pixel neighborhood
+            connectivityKernel(pgmNH, pgmNL, pgmOut, spanX, spanY, ic);
+        }
+        D(fprintf(stderr,"end:row=%d,ic=%d\n",row,ic));
+        // move the index of the central pixel to the next row
+    }
+    
+    pgmOut->max_val = pgmNH->max_val;
+    
+    // Timestamp
+    struct timeval tvStop;
+    gettimeofday(&tvStop, NULL);
+    
+    fprintf(stderr, "\nElapsed time (msec): %f\n", ((double)tvStop.tv_sec - (double)tvStart.tv_sec) * 1000 +
+                                                    ((double)tvStop.tv_usec - (double)tvStart.tv_usec) / 1000);
+    
+    return 0;
 }

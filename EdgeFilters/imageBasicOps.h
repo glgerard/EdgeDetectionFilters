@@ -30,6 +30,7 @@
 int absolutePGM(Pgm* pgmIn, Pgm* pgmOut);
 int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold);
 int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut);
+int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2);
 
 //---------------------------------------------------------//
 //----------- Advanced image operations for PGM -----------//
