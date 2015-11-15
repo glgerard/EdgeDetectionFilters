@@ -1,5 +1,5 @@
-/*! \file wrappers.h
- *  \brief All the filter operations (blurs, noises, sharpening, edge detection) are implemented in this file.
+/*! \file imageFilterOps.h
+ *  \brief Interfaces to the filter operations (blurs, noises, sharpening, edge detection).
  *  \author Eleonora Maria Aiello
  *  \author Gianluca Gerard
  *  \date 07/11/15

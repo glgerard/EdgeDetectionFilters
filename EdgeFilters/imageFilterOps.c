@@ -172,28 +172,25 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
     return 0;
 }
 
-/*! \fn medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+/*! \fn medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
  * \brief Return the median pixel of an image subarray of dimensions (dimX, dimY).
  *
  * \param pgmIn1 Pointer to the Pgm structure of the input image.
  * \param pgmIn2 Not used.
  * \param kernel Not used.
- * \param dimX The number of columns of the image subarray.
- * \param dimY The number of rows of the image subarray.
+ * \param dimX The number of columns to the left and right of the central column of the image subarray.
+ * \param dimY The number of rows to the top and to the bottom of the central row of the image subarray.
  * \param ic The linear index of the central subarray pixel in \a pgmIn1.
  * \return The value of the median pixel.
  */
-int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
     int* pixels;
     int pixel;
     int ix = 0;
     int width = pgmIn1->width;
     
-    pixels = calloc(dimX*dimY, sizeof(int));
-    
-    int spanX = dimX/2;
-    int spanY = dimY/2;
+    pixels = calloc((2*spanX+1)*(2*spanY+1), sizeof(int));
     
     // Iterate over all filter pixels
     for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
@@ -333,14 +330,14 @@ int gaussPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
     return 0;
 }
 
-/*! \fn op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+/*! \fn op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
  * \brief Return the result of applying the 3/9 operator to a pixel of \a pgmIn1.
  *
  * \param pgmIn1 Pointer to the Pgm structure of the input image.
  * \param pgmIn2 Not used.
  * \param kernel Not used.
- * \param dimX Not used.
- * \param dimY Not used.
+ * \param spanX Not used.
+ * \param spanY Not used.
  * \param ic The linear index of the central subarray pixel in \a pgmIn1.
  * \return The result of the 3/9 operator or 0 if the integral of the subarray is 0.
  */
@@ -408,18 +405,18 @@ int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
     return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 0, 0, op39Kernel);
 }
 
-/*! \fn nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+/*! \fn nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
  * \brief Return the result of applying the Nagao-Matsuyama filter to a pixel of \a pgmIn1.
  *
  * \param pgmIn1 Pointer to the Pgm structure of the input image.
  * \param pgmIn2 Not used.
  * \param kernel Not used.
- * \param dimX Not used.
- * \param dimY Not used.
+ * \param spanX Not used.
+ * \param spanY Not used.
  * \param ic The linear index of the central subarray pixel in \a pgmIn1.
  * \return The result of the Nagao-Matsuyama filter.
  */
-int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
+int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
     const int *np = NULL;
     int pixelVals[9];
@@ -430,8 +427,8 @@ int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, in
     
     // Define how far to move to the left, right, top and bottom
     // in to match the 5x5 Nagao matrixes
-    int spanX = 2;
-    int spanY = 2;
+    spanX = 2;
+    spanY = 2;
     int width = pgmIn1->width;
     
     // Iterates over all Nagao matrixes
@@ -483,18 +480,18 @@ const static int neighbors[] = {
     2, 6
 };
 
-/*! \fn suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int dimX, int dimY, int ic)
+/*! \fn suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int spanX, int spanY, int ic)
  * \brief Return the result of applying non-maximum suppression to a pixel of \a pgmIn1.
  *
  * \param pgmMod Pointer to the Pgm structure containing the modulus component.
  * \param pgmPhi Pointer to the Pgm structure containing the phase component.
  * \param kernel Not used.
- * \param dimX Not used.
- * \param dimY Not used.
+ * \param spanX Not used.
+ * \param spanY Not used.
  * \param ic The linear index of the central subarray pixel in \a pgmIn1.
  * \return The result the result of non-maximum suppression.
  */
-int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int dimX, int dimY, int ic)
+int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int spanX, int spanY, int ic)
 {
     int pixels[9];
     int ix = 0;
@@ -503,8 +500,8 @@ int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int dimX, int di
     
     // Define the left, right, top and bottom span from the
     // center to match the 3x3 pixels matrix
-    int spanX = 1;
-    int spanY = 1;
+    spanX = 1;
+    spanY = 1;
     
     // Copy the image pixels in a local pixels array
     for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)

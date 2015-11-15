@@ -38,7 +38,7 @@ int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2);
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut);
 
-int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
+int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, int dimY,
             int (*func)(Pgm*, Pgm*, double*, int, int, int));
 
 //---------------------------------------------------------//

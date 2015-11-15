@@ -56,26 +56,8 @@ int testSharpening(Pgm* imgIn, char* outputFile)
     // apply a identity filter
     Filter *idFilter = identityFilter(3,3);
     
-    /**
-    resetPGM(imgOut1);
-    convolution2DPGM(imgIn, imgOut1, idFilter);
-    resetPGM(imgOut);
-    normalizePGM(imgOut1, imgOut);
-    sprintf(pname,"%s_copy.pgm", outputFile);
-    writePGM(imgOut,pname);
-    **/
-    
     // apply a box filter
     Filter *bxFilter = boxFilter(3,3);
-    
-    /**
-    resetPGM(imgOut2);
-    convolution2DPGM(imgIn, imgOut2, bxFilter);
-    resetPGM(imgOut);
-    normalizePGM(imgOut2, imgOut);
-    sprintf(pname,"%s_box.pgm", outputFile);
-    writePGM(imgOut,pname);
-    **/
     
     // sharpening
     
@@ -115,18 +97,6 @@ int testSobel(Pgm* imgIn, char* outputFile)
     filter = sobelXFilter();
     convolution2DPGM(imgIn, imgOut1, filter);
     freeFilter(&filter);
-
-    /**
-    resetPGM(imgOut3);
-    absolutePGM(imgOut1, imgOut3);
-    resetPGM(imgOut);
-    thresholdPGM(imgOut3, imgOut);
-    resetPGM(imgOut3);
-    normalizePGM(imgOut, imgOut3);
-    
-    sprintf(pname,"%s_sobelH_T.pgm", outputFile);
-    writePGM(imgOut3,pname);
-    **/
     
     // apply a sobel vertical filter
     resetPGM(imgOut2);
@@ -134,18 +104,6 @@ int testSobel(Pgm* imgIn, char* outputFile)
     convolution2DPGM(imgIn, imgOut2, filter);
     freeFilter(&filter);
 
-    /**
-    resetPGM(imgOut3);
-    absolutePGM(imgOut2, imgOut3);
-    resetPGM(imgOut);
-    thresholdPGM(imgOut3, imgOut);
-    resetPGM(imgOut3);
-    normalizePGM(imgOut, imgOut3);
-    
-    sprintf(pname,"%s_sobelV_T.pgm", outputFile);
-    writePGM(imgOut3,pname);
-    **/
-    
     // compute the module of the two images with the
     // applied sobel filters
     resetPGM(imgOut);
@@ -170,23 +128,6 @@ int testSobel(Pgm* imgIn, char* outputFile)
     
     sprintf(pname,"%s_sobel_phi.pgm", outputFile);
     writePGM(imgOut3,pname);
-    
-    /**
-    // add the two sobel filters
-    resetPGM(imgOut);
-    resetPGM(imgOut3);
-    absolutePGM(imgOut2, imgOut3);
-    resetPGM(imgOut2);
-    absolutePGM(imgOut1, imgOut2);
-    linearAddPGM(imgOut2, imgOut3, 1.0, 1.0, imgOut);
-    resetPGM(imgOut3);
-    thresholdPGM(imgOut, imgOut3);
-    resetPGM(imgOut);
-    normalizePGM(imgOut3, imgOut);
-    
-    sprintf(pname,"%s_sobel_T.pgm", outputFile);
-    writePGM(imgOut,pname);
-    **/
     
     freePGM(&imgOut);
     freePGM(&imgOut1);

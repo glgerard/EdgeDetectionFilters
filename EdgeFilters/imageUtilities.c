@@ -1,16 +1,20 @@
-// ----------------------------------------------------- //
-// Reads information from header file                    //
-// Allows for reading and writing in PGM P2 - P5 format  //
-// Version 1.1 Piercarlo Dondi & Alessandro Gaggia       //
-// ----------------------------------------------------- //
+/*! \file imageUtilties.c
+ *  \brief Reads information from header file. Allows for reading and writing in PGM P2 - P5 format.
+ *  \author Piercarlo Dondi
+ *  \author Alessandro Gaggia
+ *  \author Gianluca Gerard
+ */
+ 
 #include "imageUtilities.h"
 
 //******************* I/O FUNCTIONS *********************//
 
-
-//-------------------------------------------------------//
-//--------------- Skip Commented Lines ------------------//
-//-------------------------------------------------------// 
+/*! \fn int skipComments(char* buf, FILE* fp)
+ * \brief Skip commented lines.
+ * \param buf Pointer to the buffer where the file lines are stored.
+ * \param fp Pointer to the image file.
+ * \return Always 0
+ */
 int skipComments(char* buf, FILE* fp)
 {
 	int i;
@@ -34,10 +38,13 @@ int skipComments(char* buf, FILE* fp)
     return 0;
 }
 
-
-//---------------------------------------------------------// 
-//------------- Create a new empty pgm image --------------//
-//---------------------------------------------------------// 
+/*! \fn Pgm* newPGM(int width, int height, int max_val)
+ * \brief Create a new empty pgm image.
+ * \param width Image's width.
+ * \param height Image's height.
+ * \param max_val Maximum pixel value in the image.
+ * \return Pointer to the new created image.
+ */
 Pgm* newPGM(int width, int height, int max_val)
 {	
 	Pgm* newPgm = (Pgm*)malloc(1*sizeof(Pgm));
@@ -49,9 +56,10 @@ Pgm* newPGM(int width, int height, int max_val)
 	return newPgm;
 }
 
-//---------------------------------------------------------// 
-//------------------ Free Pgm structure -------------------//
-//---------------------------------------------------------// 
+/*! \fn void freePGM(Pgm** pgm)
+ * \brief Free Pgm structure.
+ * \param pgm Pointer to a Pgm structure pointer.
+ */
 void freePGM(Pgm** pgm)
 {
 	free((*pgm)->pixels);
@@ -60,11 +68,10 @@ void freePGM(Pgm** pgm)
 	*pgm = NULL;
 }
 
-
-
-//---------------------------------------------------------// 
-//------- Set to zero all the pixels of a pgm image -------//
-//---------------------------------------------------------// 
+/*! \fn void resetPGM(Pgm* pgm)
+ * \brief Set to zero all the pixels of a pgm image.
+ * \param pgm Pointer to a Pgm structure.
+ */
 void resetPGM(Pgm* pgm)
 {
 	int width = pgm->width;
@@ -78,9 +85,11 @@ void resetPGM(Pgm* pgm)
 	}
 }
 
-//---------------------------------------------------------//
-//--------- Read Pixels From Different FileType -----------//
-//---------------------------------------------------------// 
+/*! \fn Pgm* readPGM(char* filename)
+ * \brief Read Pixels From Different FileType.
+ * \param filename Name of the file with the image.
+ * \return Pointer to the Pgm structure containing the read image.
+ */
 Pgm* readPGM(char* filename)
 {
 	int binary, width, height, max_val;
@@ -159,9 +168,12 @@ Pgm* readPGM(char* filename)
 	return pgm;
 }
 
-//---------------------------------------------------------//
-//--- Write Pixels inside images for Different FileType ---//
-//---------------------------------------------------------// 
+/*! \fn int writePGM(Pgm* pgm, char* filename)
+ * \brief Write Pixels inside images for Different FileType.
+ * \param pgm Pointer to the Pgm structure with the image.
+ * \param filename Name of the file where the image is written.
+ * \return 0 on success. -1 if no Pgm structure pointer is provided.
+ */
 int writePGM(Pgm* pgm, char* filename)
 {
 	if(!pgm)
@@ -194,14 +206,14 @@ int writePGM(Pgm* pgm, char* filename)
 	return 0;
 }
 
-
-
 //*************** SOME BASIC OPERATIONS *****************//
 
-//-------------------------------------------------------//
-//----- Invert Pixels GrayScale value inside images -----//
-//--------------- for Different FileType ----------------//
-//-------------------------------------------------------// 
+/*! \fn int invertPGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Invert Pixels GrayScale value inside images.
+ * \param pgmIn Pointer to the input Pgm structure with the image.
+ * \param pgmOut Pointer to the inverted Pgm structure.
+ * \return 0 on success. -1 if no Pgm structure pointer is provided.
+ */
 int invertPGM(Pgm* pgmIn, Pgm* pgmOut)
 {	
 	if(!pgmIn || !pgmOut)
@@ -228,9 +240,12 @@ int invertPGM(Pgm* pgmIn, Pgm* pgmOut)
 	return 0;
 }
 
-//-------------------------------------------------------//
-//---------------- Flip Image Horizontally --------------//
-//-------------------------------------------------------// 
+/*! \fn int hflipPGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Flip Image Horizontally.
+ * \param pgmIn Pointer to the input Pgm structure with the image.
+ * \param pgmOut Pointer to the flipped Pgm structure.
+ * \return 0 on success. -1 if no Pgm structure pointer is provided.
+ */
 int hflipPGM(Pgm* pgmIn, Pgm* pgmOut)
 {		
 	if(!pgmIn || !pgmOut)
@@ -262,10 +277,12 @@ int hflipPGM(Pgm* pgmIn, Pgm* pgmOut)
 	return 0;
 }
 
-
-//-------------------------------------------------------//
-//------------------ Copy a PGM Image -------------------//
-//-------------------------------------------------------// 
+/*! \fn int copyPGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Copy a PGM Image.
+ * \param pgmIn Pointer to the input Pgm structure with the image.
+ * \param pgmOut Pointer to the copied Pgm structure.
+ * \return 0 on success. -1 if no Pgm structure pointer is provided.
+ */
 int copyPGM(Pgm* pgmIn, Pgm* pgmOut)
 {		
 
@@ -295,63 +312,12 @@ int copyPGM(Pgm* pgmIn, Pgm* pgmOut)
 	return 0;
 }
 
-
-//--------------------------------------------------------//
-//------------------ Calculate Histogram -----------------//
-//--------------------------------------------------------// 
-Histogram* histogramPGM(Pgm* pgm)
-{
-	if(!pgm)
-	{
-		fprintf(stderr, "Error! No input data. Please Check.\n");
-		return NULL;
-	}
-	
-    int i,index, pixel;
-	int width = pgm->width;
-	int height = pgm->height;
-	int max_val = pgm->max_val;
-    
-    Histogram* histo = (Histogram*)calloc(1, sizeof(Histogram));
-    histo->max_val = max_val;
-    
-    int min_val = max_val;
-    for(i=0; i<width*height; i++)
-    {
-        pixel = pgm->pixels[i];
-        if ( pixel < min_val )
-            min_val = pixel;
-    }
-    histo->min_val = min_val;
-    histo->size = max_val - min_val + 1;
-    
-	// if max_val is 255 each pixel of the image can have a value between [0;255]
-	// so histogram have a dimension of 256
-	histo->channels = (int*)calloc(histo->size,sizeof(int));
-
-	for(i=0; i<width*height; i++)
-	{
-		index = pgm->pixels[i]-min_val;
-		histo->channels[index]++;
-	}
-	
-	return histo;
-}
-
-//--------------------------------------------------------//
-//-------------- Free an Histogram structure -------------//
-//--------------------------------------------------------//
-void freeHistogram(Histogram** handle)
-{
-    free((*handle)->channels);
-    (*handle)->channels = NULL;
-    free(*handle);
-    *handle = NULL;
-}
-
-//--------------------------------------------------------//
-//------------------ Normalize the Image -----------------//
-//--------------------------------------------------------//
+/*! \fn int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Normalize the Image.
+ * \param pgmIn Pointer to the input Pgm structure with the image.
+ * \param pgmOut Pointer to the Pgm structure with the normalized image.
+ * \return 0 on success. -1 if either input pointers is null.
+ */
 int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
     if(!pgmIn || !pgmOut)
@@ -389,9 +355,12 @@ int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     return 0;
 }
 
-//--------------------------------------------------------//
-//------------------- Equalize the Image -----------------//
-//--------------------------------------------------------//
+/*! \fn int equalizePGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Equalize the Image.
+ * \param pgmIn Pointer to the input Pgm structure with the image.
+ * \param pgmOut Pointer to the Pgm structure with the equalized image.
+ * \return 0 on success. -1 if either input pointers is null.
+ */
 int equalizePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
     if(!pgmIn || !pgmOut)
@@ -422,4 +391,60 @@ int equalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     
     freeHistogram(&histogram);
     return 0;
+}
+
+/*! \fn Histogram* histogramPGM(Pgm* pgm)
+ * \brief Computes the Histogram of an image in \a pgm.
+ * \param pgm Pointer to the input Pgm structure with the image.
+ * \return Pointer to the Histogram structure for the image.
+ */
+Histogram* histogramPGM(Pgm* pgm)
+{
+    if(!pgm)
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return NULL;
+    }
+    
+    int i,index, pixel;
+    int width = pgm->width;
+    int height = pgm->height;
+    int max_val = pgm->max_val;
+    
+    Histogram* histo = (Histogram*)calloc(1, sizeof(Histogram));
+    histo->max_val = max_val;
+    
+    int min_val = max_val;
+    for(i=0; i<width*height; i++)
+    {
+        pixel = pgm->pixels[i];
+        if ( pixel < min_val )
+            min_val = pixel;
+    }
+    histo->min_val = min_val;
+    histo->size = max_val - min_val + 1;
+    
+    // if max_val is 255 each pixel of the image can have a value between [0;255]
+    // so histogram have a dimension of 256
+    histo->channels = (int*)calloc(histo->size,sizeof(int));
+    
+    for(i=0; i<width*height; i++)
+    {
+        index = pgm->pixels[i]-min_val;
+        histo->channels[index]++;
+    }
+    
+    return histo;
+}
+
+/*! \fn void freeHistogram(Histogram** handle)
+ * \brief Free an Histogram structure.
+ * \param pgm Pointer to the Histogram structure pointer.
+ */
+void freeHistogram(Histogram** handle)
+{
+    free((*handle)->channels);
+    (*handle)->channels = NULL;
+    free(*handle);
+    *handle = NULL;
 }

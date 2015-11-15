@@ -200,7 +200,7 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 //--------------------------------------------------------//
 //--- Scan an image and apply a function to each pixel ---//
 //--------------------------------------------------------//
-int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX, int borderY,
+int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, int dimY,
               int (*func)(Pgm*, Pgm*, double*, int, int, int))
 {
     int pixel;
@@ -218,28 +218,31 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX
     int height = pgmIn1->height;
     
     if (filter != NULL) {
-        borderX = filter->width/2;
-        borderY = filter->height/2;
+        dimX = filter->width;
+        dimY = filter->height;
         kernel = filter->kernel;
     }
     
-    // Timestamp
+    int spanX = dimX/2;
+    int spanY = dimY/2;
+    
+    // Start Timestamp
     struct timeval tvStart;
     gettimeofday(&tvStart, NULL);
 
     // Move to the first useful interior pixel
-    ic = borderY*width+borderX;
+    ic = spanY*width+spanX;
     D(fprintf(stderr,"w=%d,h=%d\n",width,height));
-    D(fprintf(stderr,"bw=%d,bh=%d\n",borderX,borderY));
+    D(fprintf(stderr,"bw=%d,bh=%d\n",spanX,spanY));
     
     // Loop over all internal source image pixels
-    for (int row = borderY; row < height-borderY; row++, ic += borderX*2) {
+    for (int row = spanY; row < height-spanY; row++, ic += spanX*2) {
         D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = borderX; col < width-borderX; col++, ic++) {
+        for (int col = spanX; col < width-spanX; col++, ic++) {
             D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
             
             // Apply the function to each pixel neighborhood
-            pixel = func(pgmIn1, pgmIn2, kernel, borderX, borderY, ic);
+            pixel = func(pgmIn1, pgmIn2, kernel, spanX, spanY, ic);
 
             pgmOut->pixels[ic] = pixel;
             if (pixel > max_val)
@@ -251,7 +254,7 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX
     
     pgmOut->max_val = max_val;
     
-    // Timestamp
+    // Stop Timestamp
     struct timeval tvStop;
     gettimeofday(&tvStop, NULL);
     
@@ -264,7 +267,7 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int borderX
 //--------------------------------------------------------//
 //----- Convolve an image submatrix with a filter --------//
 //--------------------------------------------------------//
-int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, int borderY, int ic)
+int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
     double sum = 0;
     
@@ -272,8 +275,8 @@ int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int borderX, i
     
     int ix = 0;
     // Iterate over all filter pixels
-    for (int k=-borderY, il = ic-width*borderY; k <= borderY; k++, il += width)
-        for (int l=-borderX; l <= borderX; l++)
+    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (int l=-spanX; l <= spanX; l++)
             sum += pgmIn1->pixels[il+l]*kernel[ix++];
     
     return (int)floor(sum);

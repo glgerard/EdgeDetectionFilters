@@ -1,3 +1,10 @@
+/*! \file imageUtilties.h
+ *  \brief Interfaces to functions for reading and writing in PGM P2 - P5 format.
+ *  \author Piercarlo Dondi
+ *  \author Alessandro Gaggia
+ *  \author Gianluca Gerard
+ */
+
 #ifndef _IMAGEUTILITY
 #define _IMAGEUTILITY
 //---------------------------------------------------------//
@@ -15,20 +22,26 @@
 #define D(a)
 #endif
 
+/*! \struct Pgm
+ * \brief Structure to store PGM format images.
+ */
 typedef struct 
 {
-  int width;
-  int height;
-  int max_val;
-  int* pixels;
+  int width;   /*!< Image's width */
+  int height;  /*!< Image's height */
+  int max_val; /*!< Image's maximum pixel values */
+  int* pixels; /*!< Pointer to the array of pixels values */
 } Pgm;
 
+/*! \struct Histogram
+ * \brief Structure to store images Histograms.
+ */
 typedef struct
 {
-    int min_val;
-    int max_val;
-    int size;
-    int* channels;
+    int min_val;     /*!< Histogram's minimum channel */
+    int max_val;     /*!< Histogram's maximum channel */
+    int size;        /*!< Histogram's number of channels */
+    int* channels;   /*!< Pointer to the array containing the values for each channel */
 } Histogram;
 
 //---------------------------------------------------------//

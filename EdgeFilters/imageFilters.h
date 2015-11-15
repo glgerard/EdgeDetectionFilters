@@ -1,38 +1,38 @@
-//
-//  imageFilters.h
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 24/10/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file  imageFilters.h
+ *  \brief Interfaces for functions to create and free filters.
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 24/10/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #ifndef imageFilters_h
 #define imageFilters_h
 
-//---------------------------------------------------------//
-//------------------ Standard includes --------------------//
-//---------------------------------------------------------//
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "imageUtilities.h"
 
 /*! \def smallestOdd(x)
- *    \brief Find the smallestOdd next to \a x
+ *    \brief Find the smallestOdd next to \a x .
  *
  *    It returns \a x if it is odd, \a x - 1 if it is even.
  */
 #define smallestOdd(x) x%2 == 1? x: x-1
 
+/*! \struct Filter
+ *    \brief The structure used for image filters.
+ */
 typedef struct
 {
-    int width;
-    int height;
-    double* kernel;
+    int width;      /*!< Filter's width */
+    int height;     /*!< Filter's height */
+    double* kernel; /*!< Pointer to array with the filter's values */
 } Filter;
 
 //---------------------------------------------------------//
-//---------------- Basic Functions for Filter -------------//
+//--------------- Basic Functions for Filters -------------//
 //---------------------------------------------------------//
 
 Filter* newFilter(int width, int height);
