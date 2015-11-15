@@ -19,6 +19,8 @@
 #define TRUE 1
 #define FALSE 0
 
+Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2);
+
 //---------------------------------------------------------//
 //--------------- Noise  operations for PGM ---------------//
 //---------------------------------------------------------//

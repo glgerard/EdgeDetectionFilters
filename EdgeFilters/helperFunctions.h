@@ -1,10 +1,10 @@
-//
-//  helperFunctions.h
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 07/11/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file  helperFunctions.h
+ *  \brief Interfaces to basic math, sort and line processing functions.
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 07/11/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #ifndef helperFunctions_h
 #define helperFunctions_h

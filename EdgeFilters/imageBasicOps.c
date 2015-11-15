@@ -1,24 +1,34 @@
-//
-//  imageBasicOps.c
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 25/10/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file  imageBasicOps.c
+ *  \brief Basic image processing functions (absolute, linear add, threshold and fapply).
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 25/10/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #include "imageBasicOps.h"
 
-//--------------------------------------------------------//
-//-------------- Absolute of an Image --------------------//
-//--------------------------------------------------------//
+/*! \fn int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
+ * \brief Convert each pixel of the image \a pgmIn to its absolute value. The final result is stored in \a pgmOut.
+ *
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
     int pixel;
     int max_val = 0;
     
-    if(!pgmIn || !pgmOut)
+    if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -38,16 +48,27 @@ int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
     return 0;
 }
 
-//--------------------------------------------------------//
-//-------------- Threshold of an Image -------------------//
-//--------------------------------------------------------//
+/*! \fn int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
+ * \brief Binarize an image \a pgmIn based on the \a threshold value. The result is stored in \a pgmOut.
+ *
+ * Each pixel's value greater or equal than the \a threshold is converted to the value 255. All other pixels
+ * are set to 0.
+ * \param pgmIn Pointer to the input Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \param threshold The threshold value.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
 {
-    int pixel;
-
-    if(!pgmIn | !pgmOut)
+    if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -64,35 +85,45 @@ int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
     int height = pgmIn->height;
     
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
-        pixel = pgmIn->pixels[i];
+    for (int i = 0; i < width*height; i++)
         // Set the output value to black or white if it is
         // below or above the threshold
-        if (pixel>=threshold) {
-            pixel=255;
-        }
-        if (pixel<threshold) {
-            pixel=0;
-        }
-        pgmOut->pixels[i] = pixel;
-    }
+        if (pgmIn->pixels[i]>=threshold)
+            pgmOut->pixels[i] = 255;
+        else
+            pgmOut->pixels[i] =0;
     
     pgmOut->max_val = 255;
 
     return 0;
 }
 
-//--------------------------------------------------------//
-//-------------- Linearly Add two images -----------------//
-//--------------------------------------------------------//
+/*! \fn int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
+ * \brief Linear weighted sum of two images.
+ *
+ * It adds linearly the two images arrays. Each array is first multiplied by a weight. The two images
+ * must have the same dimensions.
+ * \param pgmOp1 The pointer to the first image.
+ * \param pgmOp2 The pointer to the second image.
+ * \param w1 Weigth for the first image.
+ * \param w2 Weight for the second image.
+ * \param pgmOut The pointer to the image that stores the result.
+ * \return 0 on success, -1 if either pgmOp1, pgmOp2 or pgmOut are NULL.
+ */
 int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
 {
     int pixel;
     int max_val = 0;
 
-    if(!pgmOp1 | !pgmOp2 | !pgmOut)
+    if(!pgmOp1 | !pgmOp2)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -112,9 +143,12 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
     return 0;
 }
 
-//--------------------------------------------------------//
-//----------------- Compare two images -------------------//
-//--------------------------------------------------------//
+/*! \fn int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2)
+ * \brief Compare two images \a pgmOp1 and \a pgmOp2.
+ * \param pgmOp1 Pointer to the first Pgm image structure.
+ * \param pgmOp2 Pointer to the second Pgm image structure.
+ * \return 0 if the images are equal, 1 otherwise.
+ */
 int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2)
 {
     if(!pgmOp1 | !pgmOp2)
@@ -134,17 +168,29 @@ int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2)
     return 0;
 }
 
-//--------------------------------------------------------//
-//---------- Compute the module of two images ------------//
-//--------------------------------------------------------//
+/*! \fn int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
+ * \brief Store in \a pgmOut the "module" of the two images in \a pgmOpX and \a pgmOpY as if each image's pixel
+ *  would be the x and y coordinate of a point in the cartesian plane.
+ *
+ * \param pgmOpX Pointer to the first Pgm image structure.
+ * \param pgmOpY Pointer to the second Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 {
     int pixel;
     int max_val = 0;
     
-    if(!pgmOpX || !pgmOpY | !pgmOut)
+    if(!pgmOpX | !pgmOpY)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -165,18 +211,30 @@ int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
     return 0;
 }
 
-//--------------------------------------------------------//
-//---------- Compute the phase of two images ------------//
-//--------------------------------------------------------//
+/*! \fn int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
+ * \brief Store in \a pgmOut the "phase" of the two images in \a pgmOpX and \a pgmOpY as if each image's pixel
+ *  would be the x and y coordinate of a point in polar coordinates.
+ *
+ * \param pgmOpX Pointer to the first Pgm image structure.
+ * \param pgmOpY Pointer to the second Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 {
     int pixel;
     int max_val = 0;
     double phi;
     
-    if(!pgmOpX || !pgmOpY | !pgmOut)
+    if(!pgmOpX | !pgmOpY)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -197,9 +255,28 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
     return 0;
 }
 
-//--------------------------------------------------------//
-//--- Scan an image and apply a function to each pixel ---//
-//--------------------------------------------------------//
+/*! \fn int int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, int dimY,
+ int (*func)(Pgm*, Pgm*, double*, int, int, int))
+ * \brief SScan an image and apply a function \a func to each pixel.
+ *
+ * It scans the image \a pgmIn1 and to each pixel in the image applies the function \a func.
+ * The function \a func receives 6 parameters:
+ *  - \a pgmIn1
+ *  - \a pgmIn2
+ *  - \a filter->kernel (if != NULL)
+ *  - dimX/2
+ *  - dimY/2
+ *  - a linear index in the \a pgmIn1->pixels array
+ * Each pixel in \a pgmOut is replaced with the return value of \a func for the corresponding pixel in \a pgmIn1.
+ * \param pgmIn1 Pointer to the first Pgm image structure.
+ * \param pgmIn2 Pointer to a second Pgm image structure that can optionally be accessed by \a func.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \param filter Pointer to an optional Filter structure.
+ * \param dimX The dimension along X of the subarray of \a pgmIn1 checked by \a func.
+ * \param dimY The dimension along Y of the subarray of \a pgmIn1 checked by \a func.
+ * \param func The function used to compute the value of the output pixel.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, int dimY,
               int (*func)(Pgm*, Pgm*, double*, int, int, int))
 {
@@ -208,9 +285,15 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, i
     double *kernel = NULL; // a local pointer to the filter matrix if defined
     int ic; // the index of the central pixel in the source image
     
-    if(!pgmIn1 || !pgmOut)
+    if(!pgmIn1)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -264,9 +347,19 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, i
     return 0;
 }
 
-//--------------------------------------------------------//
-//----- Convolve an image submatrix with a filter --------//
-//--------------------------------------------------------//
+/*! \fn int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
+ * \brief Convolve an image \a pgmIn with a matrix stored in \a kernel. The result is stored in \a pgmOut.
+ *
+ * It returns the value of the convolution of the matrix in \a kernel with the equally sized subregion of
+ * the image \a pgmIn1 centered at the linarly indexed pixel \a ic.
+ * \param pgmIn1 Pointer to the input Pgm image structure.
+ * \param pgmIn2 Not used.
+ * \param kernel Pointer to convolution matrix.
+ * \param spanX The number of columns to the left and right of the central column of the image subarray.
+ * \param spanY The number of rows to the top and to the bottom of the central row of the image subarray.
+ * \param ic The linear index of the central subarray pixel in \a pgmIn1.
+ * \return The result of the convolution.
+ */
 int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
     double sum = 0;
@@ -282,23 +375,38 @@ int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int
     return (int)floor(sum);
 }
 
-//--------------------------------------------------------//
-//--------------- Apply a 2D convolution -----------------//
-//--------------------------------------------------------//
-
+/*! \fn int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+ * \brief Apply to the image \a pgmIn a 2D convolution with the Filter \a filter.
+ * Store in \a pgmOut the result
+ * \param pgmIn Pointer to the input Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \param filter Pointer to the Filter structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
     return fapplyPGM(pgmIn, NULL, pgmOut, filter, 0, 0, convolution2DKernel);
 }
 
-//--------------------------------------------------------//
-//--------------- Apply a 1D X convolution ---------------//
-//--------------------------------------------------------//
+/*! \fn int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+ * \brief Apply to the image \a pgmIn  a one-dimensional convolution
+ * with the Filter \a filter along the image columns.
+ * \param pgmIn Pointer to the input Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \param filter Pointer to the Filter structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
-    if(!pgmIn || !pgmOut)
+    if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
@@ -350,14 +458,25 @@ int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     return 0;
 }
 
-//--------------------------------------------------------//
-//--------------- Apply a 1D Y convolution ---------------//
-//--------------------------------------------------------//
+/*! \fn int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
+ * \brief Apply to the image \a pgmIn  a one-dimensional convolution
+ * with the Filter \a filter along the image rows.
+ * \param pgmIn Pointer to the input Pgm image structure.
+ * \param pgmOut Pointer to the output Pgm image structure.
+ * \param filter Pointer to the Filter structure.
+ * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
+ */
 int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
-    if(!pgmIn || !pgmOut)
+    if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
+        return -1;
+    }
+    
+    if(!pgmOut)
+    {
+        fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     

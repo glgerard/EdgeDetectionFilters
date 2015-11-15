@@ -7,6 +7,7 @@
  */
 
 #include "imageFilters.h"
+#include "imageFilterOps.h"
 
 /*! \fn Filter* newFilter(int width, int height)
  * \brief Create a new image filter of size \a width x \a height.
@@ -72,38 +73,6 @@ void printFilter(Filter* filter)
     }
 }
 
-
-/*! \fn Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2)
- * \brief Linear weighted sum of two Filters.
- *
- * It adds linearly the two filters arrays. Each array is first multiplied by a weight. The two filters
- * must have the same dimensions.
- * \param filterOp1 The pointer to the first Filter.
- * \param filterOp2 The pointer to the first Filter.
- * \param w1 Weigth for the first Filter.
- * \param w2 Weight for the second Filter.
- * \return A pointer to the new Filter structure that contains the sum result.
- */
-Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2)
-{
-    if(!filterOp1 || !filterOp2 )
-    {
-        fprintf(stderr, "Error! No input data. Please Check.\n");
-        return NULL;
-    }
-    
-    int width = filterOp1->width;
-    int height = filterOp1->height;
-    
-    Filter* filter = newFilter(width,height);
-
-    for (int i = 0; i < width*height; i++) {
-        filter->kernel[i] = w1*filterOp1->kernel[i] + w2*filterOp2->kernel[i];
-    }
-    
-    return filter;
-}
-
 /*! \fn Filter* identityFilter(int width, int height)
  * \brief It creates an identity Filter.
  *
@@ -152,6 +121,7 @@ Filter* boxFilter(int width, int height)
  *
  * The box filter has all values set to the inverse of (\a width * \a height).
  *
+ * \param matrix Pointer to the array of values that will be copied in the filter's matrix.
  * \param width Filter's width.
  * \param height Filter's height.
  * \return Pointer to the newly created Filter structure or NULL if the Filter could not be created.
@@ -197,7 +167,7 @@ Filter* prewittYFilter()
     return genericFilter(prewittY,3,3);
 }
 
-const double sobelX[] = {
+const static double sobelX[] = {
      1.0, 2.0, 1.0,
      0.0, 0.0, 0.0,
     -1.0,-2.0,-1.0};
@@ -212,7 +182,7 @@ Filter* sobelXFilter()
     return genericFilter(sobelX,3,3);
 }
 
-const double sobelY[] = {
+const static double sobelY[] = {
      1.0, 0.0,-1.0,
      2.0, 0.0,-2.0,
      1.0, 0.0,-1.0};
@@ -268,7 +238,7 @@ Filter* gauss1DXFilter(double sigma, int width)
     return gauss1DFilter(sigma, width, filter);
 }
 
-/*! \fn Filter* gauss1DYFilter(double sigma, int width)
+/*! \fn Filter* gauss1DYFilter(double sigma, int height)
  * \brief Creates a 1 dimensional Gauss filter with 1 column and \a height rows.
  *
  * \param sigma The sigma of the Gaussian.
@@ -289,7 +259,7 @@ Filter* gauss1DYFilter(double sigma, int height)
  * \brief Creates a 2-dimensional Gauss filter with \a dim columns and \a dim rows.
  *
  * \param sigma The sigma of the Gaussian.
- * \param height The number of rows and columns of the filter. If it is set to 0 then the dimension
+ * \param dim The number of rows and columns of the filter. If it is set to 0 then the dimension
  *        is the smallest odd number next to 6 \a sigma.
  * \return Pointer to the Gauss filter.
  */
@@ -324,7 +294,7 @@ Filter* gauss2DFilter(double sigma, int dim)
  * \a sigma / 1.66 .
  *
  * \param sigma The sigma of the external Gaussian.
- * \param height The number of rows and columns of the filter. If it is set to 0 then the dimension
+ * \param dim The number of rows and columns of the filter. If it is set to 0 then the dimension
  *        is the smallest odd number next to 6 \a sigma.
  * \return Pointer to the DoG filter.
  */

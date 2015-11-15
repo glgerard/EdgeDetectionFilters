@@ -1,4 +1,4 @@
-/*! \file imageUtilties.c
+/*! \file imageUtilities.c
  *  \brief Reads information from header file. Allows for reading and writing in PGM P2 - P5 format.
  *  \author Piercarlo Dondi
  *  \author Alessandro Gaggia
@@ -439,7 +439,7 @@ Histogram* histogramPGM(Pgm* pgm)
 
 /*! \fn void freeHistogram(Histogram** handle)
  * \brief Free an Histogram structure.
- * \param pgm Pointer to the Histogram structure pointer.
+ * \param handle Pointer to the Histogram structure pointer.
  */
 void freeHistogram(Histogram** handle)
 {

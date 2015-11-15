@@ -39,8 +39,6 @@ Filter* newFilter(int width, int height);
 void freeFilter(Filter** filter);
 void printFilter(Filter* filter);
 
-Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2);
-
 //---------------------------------------------------------//
 //---------------------- Basic Filters --------------------//
 //---------------------------------------------------------//

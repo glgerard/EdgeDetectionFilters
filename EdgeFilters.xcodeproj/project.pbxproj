@@ -59,6 +59,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		367332881BF910D7006F8988 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				36AB89FF1BE7D161003C0E5B /* test.c */,
+				36AB8A001BE7D161003C0E5B /* test.h */,
+			);
+			name = test;
+			sourceTree = "<group>";
+		};
 		36AB89E01BE4DD61003C0E5B = {
 			isa = PBXGroup;
 			children = (
@@ -78,6 +87,7 @@
 		36AB89EB1BE4DD61003C0E5B /* EdgeFilters */ = {
 			isa = PBXGroup;
 			children = (
+				367332881BF910D7006F8988 /* test */,
 				36AB89F51BE4DDFB003C0E5B /* imageFilters.c */,
 				36AB89F61BE4DDFB003C0E5B /* imageFilters.h */,
 				36AB89F71BE4DDFB003C0E5B /* imageBasicOps.c */,
@@ -85,8 +95,6 @@
 				36AB89F91BE4DDFB003C0E5B /* imageUtilities.c */,
 				36AB89FA1BE4DDFB003C0E5B /* imageUtilities.h */,
 				36AB89F31BE4DDDB003C0E5B /* main.c */,
-				36AB89FF1BE7D161003C0E5B /* test.c */,
-				36AB8A001BE7D161003C0E5B /* test.h */,
 				36AB8A021BEDFB69003C0E5B /* helperFunctions.c */,
 				36AB8A031BEDFB69003C0E5B /* helperFunctions.h */,
 				36AB8A051BEE47A8003C0E5B /* imageFilterOps.c */,

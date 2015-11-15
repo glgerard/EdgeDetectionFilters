@@ -79,12 +79,43 @@ const static int* nagao[] = {
 // Number of 1's in each Nagao matrix
 const static int nagaoSize[9] = {9, 7, 7, 7, 7, 7, 7, 7, 7};
 
+/*! \fn Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2)
+ * \brief Linear weighted sum of two Filters.
+ *
+ * It adds linearly the two filters arrays. Each array is first multiplied by a weight. The two filters
+ * must have the same dimensions.
+ * \param filterOp1 The pointer to the first Filter.
+ * \param filterOp2 The pointer to the second Filter.
+ * \param w1 Weigth for the first Filter.
+ * \param w2 Weight for the second Filter.
+ * \return A pointer to the new Filter structure that contains the sum result.
+ */
+Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2)
+{
+    if(!filterOp1 || !filterOp2 )
+    {
+        fprintf(stderr, "Error! No input data. Please Check.\n");
+        return NULL;
+    }
+    
+    int width = filterOp1->width;
+    int height = filterOp1->height;
+    
+    Filter* filter = newFilter(width,height);
+    
+    for (int i = 0; i < width*height; i++) {
+        filter->kernel[i] = w1*filterOp1->kernel[i] + w2*filterOp2->kernel[i];
+    }
+    
+    return filter;
+}
+
 /*! \fn int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
  * \brief Add uniform noise to the image \a pgmIn. The final result is stored in \a pgmOut.
  *
  * Add to each pixel of the image a value in the interval [-range, +range] with uniform density.
- * \param imgIn Pointer to the input PGM image structure.
- * \param imgOut Pointer to the output PGM image structure.
+ * \param pgmIn Pointer to the input PGM image structure.
+ * \param pgmOut Pointer to the output PGM image structure.
  * \param range The absolute max value of the range.
  * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
@@ -178,8 +209,8 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
  * \param pgmIn1 Pointer to the Pgm structure of the input image.
  * \param pgmIn2 Not used.
  * \param kernel Not used.
- * \param dimX The number of columns to the left and right of the central column of the image subarray.
- * \param dimY The number of rows to the top and to the bottom of the central row of the image subarray.
+ * \param spanX The number of columns to the left and right of the central column of the image subarray.
+ * \param spanY The number of rows to the top and to the bottom of the central row of the image subarray.
  * \param ic The linear index of the central subarray pixel in \a pgmIn1.
  * \return The value of the median pixel.
  */
@@ -682,7 +713,7 @@ int dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
     return 0;
 }
 
-/*! \fn cedPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold_low, int threshold_high)
+/*! \fn cedPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim, int threshold_low, int threshold_high)
  * \brief Filter the image \a pgmIn with two Prewitt filters alogn the vertical and horizontal direction.
  *        Returns either the magnitute or the phase based on \a phase.
  *
@@ -692,6 +723,8 @@ int dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
  * \param pgmOut Pointer to the output PGM image structure.
  * \param sigma The external sigma of the DoG filter. The internal sigma is set to \a sigma / 1.66 .
  * \param dim The rows and columns of the DoG filter. If set to 0 then it will be the smallest odd next to 6 \a sigma.
+ * \param threshold_low Lower threshold used by the Canny algorithm.
+ * \param threshold_high Hihger threshold used by the Canny algorithm.
  * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
 int cedPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim, int threshold_low, int threshold_high)

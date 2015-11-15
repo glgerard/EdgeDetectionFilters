@@ -1,16 +1,16 @@
-//
-//  helperFunctions.c
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 07/11/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file  helperFunctions.c
+ *  \brief Basic math, sort and line processing functions.
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 07/11/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #include "helperFunctions.h"
 
-//--------------------------------------------------------//
-//-------------      Compute a modulo b       ------------//
-//--------------------------------------------------------//
+/*! \fn int mod (int a, int b)
+ *   \brief Return the modulus of \a a given \a b.
+ */
 int mod (int a, int b)
 {
     int ret = a % b;
@@ -19,17 +19,17 @@ int mod (int a, int b)
     return ret;
 }
 
-//--------------------------------------------------------//
-//----------- Compute the max between a and b ------------//
-//--------------------------------------------------------//
+/*! \fn int max (int a, int b)
+ *   \brief Return the maximum between \a a and \a b.
+ */
 int max (int a, int b)
 {
     return a >= b ? a : b;
 }
 
-//--------------------------------------------------------//
-//--------- Compute the mean values of an array ----------//
-//--------------------------------------------------------//
+/*! \fn double mean(int *array, int len)
+ *   \brief Return the average value of an array \a array of length \a len.
+ */
 double mean(int *array, int len)
 {
     int sum = 0;
@@ -40,9 +40,9 @@ double mean(int *array, int len)
     return (double)sum/len;
 }
 
-//--------------------------------------------------------//
-//----------- Compute the variance of an array -----------//
-//--------------------------------------------------------//
+/*! \fn double var(int* array, int len)
+ *   \brief Return the variance of an array \a array of length \a len.
+ */
 double var(int* array, int len)
 {
     double sum = 0;
@@ -54,9 +54,9 @@ double var(int* array, int len)
     return sum/len;
 }
 
-//--------------------------------------------------------//
-//---------------------- Bubble Sort ---------------------//
-//--------------------------------------------------------//
+/*! \fn int* sort(int* array, int len)
+ *   \brief Return the array \a array of length \a len sorted in increasing order.
+ */
 int* sort(int* array, int len)
 {
     int temp;
@@ -76,9 +76,9 @@ int* sort(int* array, int len)
     return array;
 }
 
-//--------------------------------------------------------//
-//------ Remove leading and trailing white spaces --------//
-//--------------------------------------------------------//
+/*! \fn char *trimwhitespace(char *str)
+ *   \brief Remove leading and trailing white spaces from the null terminated string \a str.
+ */
 char *trimwhitespace(char *str)
 {
     char *end;
@@ -99,30 +99,18 @@ char *trimwhitespace(char *str)
     return str;
 }
 
+/*! \fn int quadrant(int a)
+ *   \brief Return one of four quadrants where the angle \a a falls. The angle is in degree.
+ *
+ *   The angle \a a is categorized in one of the following 4 quadrants:
+ *      - 0: [ -22.5,  +22.5] or [+157.5, +180.0] or [-157.5, -180.0]
+ *      - 1: [ +22.5,  +67.5] or [-157.5, -112.5]
+ *      - 2: [ +67.5, +112.5] or [-112.5,  -67.5]
+ *      - 3: [+112.5, +157.5] or [ -67.5,  -22.5]
+ */
 int quadrant(int a)
 {
     int angle = (int)(a/22.5);
-
-    /**
-    if ((-8 <= angle) && (angle < -7))
-        return 0;
-    else if ((-7 <= angle) && (angle < -5))
-        return 1;
-    else if ((-5 <= angle) && (angle < -3))
-        return 2;
-    else if ((-3 <= angle) && (angle < -1))
-        return 3;
-    else if ((-1 <= angle) && (angle < 1) )
-        return 0;
-    else if ((1 <= angle) && (angle < 3))
-        return 1;
-    else if ((3 <= angle) && (angle < 5))
-        return 2;
-    else if ((5 <= angle) && (angle < 7))
-        return 3;
-    else if ((angle <= 8))
-        return 0;
-**/
     
     if ((-6 == angle) || (angle == -5))
         return 1;

@@ -1,10 +1,10 @@
-//
-//  imageBasicOps.h
-//  EdgeFilters
-//
-//  Created by Gianluca Gerard on 25/10/15.
-//  Copyright © 2015 Gianluca Gerard. All rights reserved.
-//
+/*! \file  imageBasicOps.h
+ *  \brief Interfaces to image processing functions (absolute, linear add, threshold and fapply).
+ *  \author Eleonora Maria Aiello
+ *  \author Gianluca Gerard
+ *  \date 25/10/15
+ *  \copyright Apache License Version 2.0, January 2004
+ */
 
 #ifndef imageBasicOps_h
 #define imageBasicOps_h
@@ -22,6 +22,9 @@
 #include "imageFilters.h"
 #include "imageFilterOps.h"
 
+/*! \def drandom() (((double)(random()&0xffffff))/0xffffff)
+ *  \brief Return a random value in the the interval [0.0, 1.0]
+ */
 #define drandom() (((double)(random()&0xffffff))/0xffffff)
 
 //---------------------------------------------------------//

@@ -1,4 +1,4 @@
-/*! \file imageUtilties.h
+/*! \file imageUtilities.h
  *  \brief Interfaces to functions for reading and writing in PGM P2 - P5 format.
  *  \author Piercarlo Dondi
  *  \author Alessandro Gaggia
