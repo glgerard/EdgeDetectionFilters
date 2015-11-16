@@ -18,9 +18,9 @@ IMGNAME=`basename $FILENAME .$EXT`
 
 FILTER_DIR=../filters
 
-PROFILE=Debug
+BINDIR=${HOME}/bin
 
-CMDLINE=~/Library/Developer/Xcode/DerivedData/EdgeFilters-aksqrumxnvntuogoktsfuczjtoem/Build/Products/$PROFILE/EdgeFilters
+CMDLINE=${BINDIR}/filterPGM
 
 $CMDLINE -f ${FILTER_DIR}/noiseu.flt $FILENAME
 

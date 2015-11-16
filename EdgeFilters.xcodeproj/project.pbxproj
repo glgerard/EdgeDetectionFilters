@@ -33,6 +33,25 @@
 		3611C0321BF60CAA0070B2E2 /* imageContours.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageContours.c; sourceTree = "<group>"; };
 		3611C0331BF60CAA0070B2E2 /* imageContours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageContours.h; sourceTree = "<group>"; };
 		367332891BFA2033006F8988 /* run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		3673328B1BFA4B6D006F8988 /* ced.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ced.flt; sourceTree = "<group>"; };
+		3673328C1BFA4B6D006F8988 /* dog_4_T_cnt.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_4_T_cnt.flt; sourceTree = "<group>"; };
+		3673328D1BFA4B6D006F8988 /* dog_4_T.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_4_T.flt; sourceTree = "<group>"; };
+		3673328E1BFA4B6D006F8988 /* dog_4.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_4.flt; sourceTree = "<group>"; };
+		3673328F1BFA4B6D006F8988 /* dog_6_T_cnt.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_6_T_cnt.flt; sourceTree = "<group>"; };
+		367332901BFA4B6D006F8988 /* dog_6_T.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_6_T.flt; sourceTree = "<group>"; };
+		367332911BFA4B6D006F8988 /* dog_6.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_6.flt; sourceTree = "<group>"; };
+		367332921BFA4B6D006F8988 /* dog_2_T_cnt.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_2_T_cnt.flt; sourceTree = "<group>"; };
+		367332931BFA4B6D006F8988 /* dog_2_T.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_2_T.flt; sourceTree = "<group>"; };
+		367332941BFA4B6D006F8988 /* dog_2.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dog_2.flt; sourceTree = "<group>"; };
+		367332951BFA4B6D006F8988 /* nagao.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nagao.flt; sourceTree = "<group>"; };
+		367332961BFA4B6D006F8988 /* sobel_T.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sobel_T.flt; sourceTree = "<group>"; };
+		367332971BFA4B6D006F8988 /* prw_T.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prw_T.flt; sourceTree = "<group>"; };
+		367332981BFA4B6D006F8988 /* prw.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prw.flt; sourceTree = "<group>"; };
+		367332991BFA4B6D006F8988 /* cnt.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cnt.flt; sourceTree = "<group>"; };
+		3673329A1BFA4B6D006F8988 /* sobel_thr.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sobel_thr.flt; sourceTree = "<group>"; };
+		3673329B1BFA4B6D006F8988 /* noisesp.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = noisesp.flt; sourceTree = "<group>"; };
+		3673329C1BFA4B6D006F8988 /* noiseu.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = noiseu.flt; sourceTree = "<group>"; };
+		3673329D1BFA4B6D006F8988 /* sobel.flt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sobel.flt; sourceTree = "<group>"; };
 		36AB89E91BE4DD61003C0E5B /* EdgeFilters */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EdgeFilters; sourceTree = BUILT_PRODUCTS_DIR; };
 		36AB89F31BE4DDDB003C0E5B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		36AB89F51BE4DDFB003C0E5B /* imageFilters.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageFilters.c; sourceTree = "<group>"; };
@@ -69,6 +88,32 @@
 			name = test;
 			sourceTree = "<group>";
 		};
+		3673328A1BFA4B28006F8988 /* filters */ = {
+			isa = PBXGroup;
+			children = (
+				3673328B1BFA4B6D006F8988 /* ced.flt */,
+				3673328C1BFA4B6D006F8988 /* dog_4_T_cnt.flt */,
+				3673328D1BFA4B6D006F8988 /* dog_4_T.flt */,
+				3673328E1BFA4B6D006F8988 /* dog_4.flt */,
+				3673328F1BFA4B6D006F8988 /* dog_6_T_cnt.flt */,
+				367332901BFA4B6D006F8988 /* dog_6_T.flt */,
+				367332911BFA4B6D006F8988 /* dog_6.flt */,
+				367332921BFA4B6D006F8988 /* dog_2_T_cnt.flt */,
+				367332931BFA4B6D006F8988 /* dog_2_T.flt */,
+				367332941BFA4B6D006F8988 /* dog_2.flt */,
+				367332951BFA4B6D006F8988 /* nagao.flt */,
+				367332961BFA4B6D006F8988 /* sobel_T.flt */,
+				367332971BFA4B6D006F8988 /* prw_T.flt */,
+				367332981BFA4B6D006F8988 /* prw.flt */,
+				367332991BFA4B6D006F8988 /* cnt.flt */,
+				3673329A1BFA4B6D006F8988 /* sobel_thr.flt */,
+				3673329B1BFA4B6D006F8988 /* noisesp.flt */,
+				3673329C1BFA4B6D006F8988 /* noiseu.flt */,
+				3673329D1BFA4B6D006F8988 /* sobel.flt */,
+			);
+			name = filters;
+			sourceTree = "<group>";
+		};
 		36AB89E01BE4DD61003C0E5B = {
 			isa = PBXGroup;
 			children = (
@@ -88,6 +133,7 @@
 		36AB89EB1BE4DD61003C0E5B /* EdgeFilters */ = {
 			isa = PBXGroup;
 			children = (
+				3673328A1BFA4B28006F8988 /* filters */,
 				367332881BF910D7006F8988 /* test */,
 				36AB89F51BE4DDFB003C0E5B /* imageFilters.c */,
 				36AB89F61BE4DDFB003C0E5B /* imageFilters.h */,
