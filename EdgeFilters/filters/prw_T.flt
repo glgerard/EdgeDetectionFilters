@@ -1,0 +1,3 @@
+prewitt
+normalize
+threshold 64
