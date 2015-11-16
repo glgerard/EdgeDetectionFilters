@@ -55,16 +55,17 @@ void freeFilter(Filter** filter)
  */
 void printFilter(Filter* filter)
 {
+    int i;
+    int width = filter->width;
+    int height = filter->height;
+    int il=0;
+    
     if (!filter) {
         fprintf(stderr, "Error! No input data. Please Check.\n");
         return;
     }
     
-    int width = filter->width;
-    int height = filter->height;
-    
-    int il=0;
-    for (int i=0; i<height; i++) {
+    for (i=0; i<height; i++) {
         printf("[");
         for (int j=0; j<width; j++) {
             printf("%f ",filter->kernel[il++]);
@@ -85,11 +86,13 @@ void printFilter(Filter* filter)
  */
 Filter* identityFilter(int width, int height)
 {
+    int i;
+    
     Filter* filter = newFilter(width,height);
     if (!filter) {
         return NULL;
     }
-    for (int i=0; i<height*width; i++)
+    for (i=0; i<height*width; i++)
         filter->kernel[i] = 0.0;
     filter->kernel[width*height/2] = 1.0;
     return filter;
@@ -106,12 +109,14 @@ Filter* identityFilter(int width, int height)
  */
 Filter* boxFilter(int width, int height)
 {
+    int i;
+    double weigth = 1.0/(width*height);
+
     Filter* filter = newFilter(width,height);
     if (!filter) {
         return NULL;
     }
-    double weigth = 1.0/(width*height);
-    for (int i=0; i<height*width; i++)
+    for (i=0; i<height*width; i++)
         filter->kernel[i] = weigth;
     return filter;
 }
@@ -128,11 +133,12 @@ Filter* boxFilter(int width, int height)
  */
 Filter* genericFilter(const double* matrix, int width, int height)
 {
+    int i;
     Filter* filter = newFilter(width, height);
     if (!filter) {
         return NULL;
     }
-    for (int i=0; i<height*width; i++)
+    for (i=0; i<height*width; i++)
         filter->kernel[i] = matrix[i];
     return filter;
 }
@@ -207,13 +213,14 @@ Filter* sobelYFilter()
  */
 Filter* gauss1DFilter(double sigma, int dim, Filter *filter)
 {
+    int i;
     double gc = M_2_SQRTPI*M_SQRT1_2/(2*sigma);
     double sigma2 = sigma*sigma;
     
     int halfDim = dim/2;
     
     int x=-halfDim;
-    for (int i=0; i<dim; i++) {
+    for (i=0; i<dim; i++) {
         filter->kernel[i] = gc*exp(-x*x/sigma2);
         x++;
     }
@@ -265,6 +272,7 @@ Filter* gauss1DYFilter(double sigma, int height)
  */
 Filter* gauss2DFilter(double sigma, int dim)
 {
+    int x, y;
     double gc;
     double sigma2 = sigma*sigma;
     double gc0 = M_1_PI/(2*sigma2);
@@ -277,9 +285,9 @@ Filter* gauss2DFilter(double sigma, int dim)
     int halfDim = dim/2;
     
     int il = 0;
-    for (int x=-halfDim; x<=halfDim; x++) {
+    for (x=-halfDim; x<=halfDim; x++) {
         gc = gc0*exp(-x*x/sigma2);
-        for (int y=-halfDim; y<=halfDim; y++)
+        for (y=-halfDim; y<=halfDim; y++)
             filter->kernel[il++] = gc*exp(-y*y/sigma2);
     }
     

@@ -28,6 +28,8 @@ int contourUniformKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, in
     // This function computes the integral of the absolute values of the neighborhood.
     // If the integral is 9 * value of the central pixel, the central pixel is not
     // on the contour. Otherwise it is a contour pixel.
+ 
+    int k, l, il;
     
     spanX = 1;
     spanY = 1;
@@ -39,8 +41,8 @@ int contourUniformKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, in
     int sum = 0;
 
     // Iterate over all filter pixels
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++)
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++)
             // Compute the integral of the neighborhood
             sum += abs(pgmIn1->pixels[il+l]);
     
@@ -80,6 +82,7 @@ int contourUniformPGM(Pgm* pgmIn, Pgm* pgmOut)
  */
 int contourN8IntKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
+    int k, l, il;
     spanX = 1;
     spanY = 1;
     
@@ -92,8 +95,8 @@ int contourN8IntKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int 
     int width = pgmIn1->width;
     
     // Iterate over all filter pixels
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++)
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++)
             if (pgmIn1->pixels[il+l] == bck)
                 // There is at least one background pixel
                 return 0;
@@ -130,6 +133,7 @@ int contourN8IntPGM(Pgm* pgmIn, Pgm* pgmOut)
  */
 void connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, Pgm* pgmOut, int ic)
 {
+    int k, l, il;
     if ((pgmOut->pixels[ic] = pgmNH->pixels[ic])==0)
         return;
 
@@ -139,8 +143,8 @@ void connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, Pgm* pgmOut, int ic)
     int width = pgmNL->width;
     
     // Iterate over all N8 set in NL pixels
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++)
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++)
             // If the pixel is different from 0 it is connected
             if (pgmNL->pixels[il+l] != 0)
                 pgmOut->pixels[il+l] = 255;
@@ -160,6 +164,7 @@ void connectivityKernel(Pgm *pgmNH, Pgm* pgmNL, Pgm* pgmOut, int ic)
  */
 int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut)
 {
+    int row, col;
     int ic; // the index of the central pixel in the source image
     
     if(!pgmNH || !pgmNL)
@@ -190,9 +195,9 @@ int connectivityPGM(Pgm *pgmNH, Pgm *pgmNL, Pgm *pgmOut)
     D(fprintf(stderr,"bw=%d,bh=%d\n",borderX,borderY));
     
     // Loop over all internal source image pixels
-    for (int row = borderY; row < height-borderY; row++, ic += borderX*2) {
+    for (row = borderY; row < height-borderY; row++, ic += borderX*2) {
         D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = borderX; col < width-borderX; col++, ic++) {
+        for (col = borderX; col < width-borderX; col++, ic++) {
             D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
             
             // Apply the function to each pixel neighborhood

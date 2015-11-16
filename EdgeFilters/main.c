@@ -24,7 +24,9 @@
 
 int removeExt(char* src)
 {
-    for (int i = (int)strlen(src); i != 0; i--) {
+    int i;
+    
+    for (i = (int)strlen(src); i != 0; i--) {
         if (src[i] == '.') {
             src[i] = '\0';
             break;

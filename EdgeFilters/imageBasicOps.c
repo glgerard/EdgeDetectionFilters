@@ -17,6 +17,7 @@
  */
 int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
+    int i;
     int pixel;
     int max_val = 0;
     
@@ -26,17 +27,17 @@ int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
         return -1;
     }
     
+    int width = pgmIn->width;
+    int height = pgmIn->height;
+    
     if(!pgmOut)
     {
         fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         pixel = abs(pgmIn->pixels[i]);
         pgmOut->pixels[i] = pixel;
         if ( pixel > max_val)
@@ -60,11 +61,16 @@ int absolutePGM(Pgm* pgmIn, Pgm* pgmOut)
  */
 int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
 {
+    int i;
+
     if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
         return -1;
     }
+    
+    int width = pgmIn->width;
+    int height = pgmIn->height;
     
     if(!pgmOut)
     {
@@ -80,12 +86,9 @@ int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
     if (threshold < 0) {
         threshold = 0;
     }
-    
-    int width = pgmIn->width;
-    int height = pgmIn->height;
-    
+
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++)
+    for (i = 0; i < width*height; i++)
         // Set the output value to black or white if it is
         // below or above the threshold
         if (pgmIn->pixels[i]>=threshold)
@@ -112,6 +115,7 @@ int thresholdPGM(Pgm* pgmIn, Pgm* pgmOut, int threshold)
  */
 int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
 {
+    int i;
     int pixel;
     int max_val = 0;
 
@@ -121,17 +125,17 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
         return -1;
     }
     
+    int width = pgmOp1->width;
+    int height = pgmOp1->height;
+
     if(!pgmOut)
     {
         fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
     
-    int width = pgmOp1->width;
-    int height = pgmOp1->height;
-    
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         pixel = (int)(w1*pgmOp1->pixels[i] + w2*pgmOp2->pixels[i]);
         pgmOut->pixels[i] = pixel;
         if ( pixel > max_val)
@@ -151,17 +155,19 @@ int linearAddPGM(Pgm* pgmOp1, Pgm* pgmOp2, double w1, double w2, Pgm* pgmOut)
  */
 int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2)
 {
+    int i;
+    
     if(!pgmOp1 | !pgmOp2)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
         return -1;
     }
-    
+
     int width = pgmOp1->width;
     int height = pgmOp1->height;
     
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++)
+    for (i = 0; i < width*height; i++)
         if (pgmOp1->pixels[i] != pgmOp2->pixels[i])
             return 1;
     
@@ -179,14 +185,18 @@ int comparePGM(Pgm* pgmOp1, Pgm* pgmOp2)
  */
 int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 {
+    int i;
     int pixel;
     int max_val = 0;
-    
+
     if(!pgmOpX | !pgmOpY)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
         return -1;
     }
+    
+    int width = pgmOpX->width;
+    int height = pgmOpX->height;
     
     if(!pgmOut)
     {
@@ -194,11 +204,8 @@ int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
         return -1;
     }
     
-    int width = pgmOpX->width;
-    int height = pgmOpX->height;
-    
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         pixel = (int)sqrt(pgmOpX->pixels[i]*pgmOpX->pixels[i] +
                              pgmOpY->pixels[i]*pgmOpY->pixels[i]);
         pgmOut->pixels[i] = pixel;
@@ -222,6 +229,7 @@ int modulePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
  */
 int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 {
+    int i;
     int pixel;
     int max_val = 0;
     double phi;
@@ -231,18 +239,18 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
         fprintf(stderr, "Error! No input data. Please Check.\n");
         return -1;
     }
+
+    int width = pgmOpX->width;
+    int height = pgmOpX->height;
     
     if(!pgmOut)
     {
         fprintf(stderr, "Error! No space to store the result. Please Check.\n");
         return -1;
     }
-    
-    int width = pgmOpX->width;
-    int height = pgmOpX->height;
-    
+
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         phi = atan2(pgmOpY->pixels[i], pgmOpX->pixels[i])*M_1_PI*127;
         pixel = (int)phi;
         pgmOut->pixels[i] = pixel;
@@ -280,10 +288,12 @@ int phasePGM(Pgm* pgmOpX, Pgm* pgmOpY, Pgm* pgmOut)
 int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, int dimY,
               int (*func)(Pgm*, Pgm*, double*, int, int, int))
 {
+    int row, col;
     int pixel;
     int max_val = 0;
     double *kernel = NULL; // a local pointer to the filter matrix if defined
     int ic; // the index of the central pixel in the source image
+
     
     if(!pgmIn1)
     {
@@ -319,9 +329,9 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, i
     D(fprintf(stderr,"bw=%d,bh=%d\n",spanX,spanY));
     
     // Loop over all internal source image pixels
-    for (int row = spanY; row < height-spanY; row++, ic += spanX*2) {
+    for (row = spanY; row < height-spanY; row++, ic += spanX*2) {
         D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = spanX; col < width-spanX; col++, ic++) {
+        for (col = spanX; col < width-spanX; col++, ic++) {
             D(fprintf(stderr,"(%d,%d),ic=%d\n", row, col, ic));
             
             // Apply the function to each pixel neighborhood
@@ -362,14 +372,15 @@ int fapplyPGM(Pgm* pgmIn1, Pgm* pgmIn2, Pgm* pgmOut, Filter* filter, int dimX, i
  */
 int convolution2DKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
+    int k,l, il;
     double sum = 0;
     
     int width = pgmIn1->width;
     
     int ix = 0;
     // Iterate over all filter pixels
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++)
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++)
             sum += pgmIn1->pixels[il+l]*kernel[ix++];
     
     return (int)floor(sum);
@@ -398,6 +409,15 @@ int convolution2DPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
  */
 int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
+    int row, col, l;
+    double sum;
+    int pixelVal;
+    int topVal = 0;
+    
+    int ix; // the index in the filter
+    int ic; // the index of the central pixel in the source image
+    int il; // the index of the pixel used in the integration
+    
     if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
@@ -410,13 +430,10 @@ int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
         return -1;
     }
     
-    double sum;
-    int pixelVal;
-    int topVal = 0;
-    
-    int ix; // the index in the filter
-    int ic; // the index of the central pixel in the source image
-    int il; // the index of the pixel used in the integration
+    if(!filter) {
+        fprintf(stderr, "Error! No filter defined. Please Check.\n");
+        return -1;
+    }
     
     int width = pgmIn->width;
     int height = pgmIn->height;
@@ -429,9 +446,9 @@ int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     D(fprintf(stderr,"w=%d,h=%d\n",width,height));
     
     // Loop over all internal source image pixels
-    for (int row = 0; row < height; row++) {
+    for (row = 0; row < height; row++) {
         D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = halfFilterWidth; col < width-halfFilterWidth; col++) {
+        for (col = halfFilterWidth; col < width-halfFilterWidth; col++) {
             // compute the initial neighoboring pixel index to use in the convolution
             il = ic-halfFilterWidth;
             sum = 0;
@@ -439,7 +456,7 @@ int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
             
             // Iterate over all filter pixels
             D(fprintf(stderr,"il=%d\n", il));
-            for (int l=0; l < filterWidth; l++)
+            for (l=0; l < filterWidth; l++)
                 sum += pgmIn->pixels[il++]*filter->kernel[ix++];
             
             // output the value of the convolution in the destination image
@@ -468,6 +485,15 @@ int convolution1DXPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
  */
 int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
 {
+    int row, col, k;
+    double sum;
+    int pixelVal;
+    int topVal = 0;
+    
+    int ix;  // the index in the filter
+    int ic; // the index of the central pixel in the source image
+    int il; // the index of the pixel used in the integration
+    
     if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
@@ -480,13 +506,10 @@ int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
         return -1;
     }
     
-    double sum;
-    int pixelVal;
-    int topVal = 0;
-    
-    int ix;  // the index in the filter
-    int ic; // the index of the central pixel in the source image
-    int il; // the index of the pixel used in the integration
+    if(!filter) {
+        fprintf(stderr, "Error! No filter defined. Please Check.\n");
+        return -1;
+    }
     
     int width = pgmIn->width;
     int height = pgmIn->height;
@@ -501,15 +524,15 @@ int convolution1DYPGM(Pgm* pgmIn, Pgm* pgmOut, Filter* filter)
     D(fprintf(stderr,"w=%d,h=%d\n",width,height));
     
     // Loop over all internal source image pixels
-    for (int row = halfFilterHeight; row < height-halfFilterHeight; row++) {
+    for (row = halfFilterHeight; row < height-halfFilterHeight; row++) {
         D(fprintf(stderr,"start:row=%d,ic=%d\n",row,ic));
-        for (int col = 0; col < width; col++) {
+        for (col = 0; col < width; col++) {
             // compute the initial neighoboring pixel index to use in the convolution
             il = ic-rowShift;
             sum = 0;
             ix = 0;
             // Iterate over all filter pixels
-            for (int k=0; k < filterHeight; k++) {
+            for (k=0; k < filterHeight; k++) {
                 D(fprintf(stderr,"k=%d,il=%d\n", k, il));
                 sum += pgmIn->pixels[il]*filter->kernel[ix++];
                 // move the index of the neighboring pixel to the next row

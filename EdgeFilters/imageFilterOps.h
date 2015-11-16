@@ -41,8 +41,8 @@ int op39PGM(Pgm *pgmIn, Pgm* pgmOut);
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut);
 int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut);
 
-int sobelPGM(Pgm* imgIn, Pgm* imgOut, uint8_t phase);
-int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase);
+int sobelPGM(Pgm* imgIn, Pgm* imgOut, unsigned int phase);
+int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, unsigned int phase);
 int dogPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim);
 int cedPGM(Pgm* imgIn, Pgm* imgOut, double sigma, int dim, int threshold, int thresholdRatio);
 

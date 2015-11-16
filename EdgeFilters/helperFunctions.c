@@ -32,9 +32,10 @@ int max (int a, int b)
  */
 double mean(int *array, int len)
 {
+    int i;
     int sum = 0;
     
-    for (int i=0; i<len; i++)
+    for (i=0; i<len; i++)
         sum += array[i];
     
     return (double)sum/len;
@@ -45,10 +46,11 @@ double mean(int *array, int len)
  */
 double var(int* array, int len)
 {
+    int i;
     double sum = 0;
     double m = mean(array, len);
     
-    for (int i=0; i<len; i++)
+    for (i=0; i<len; i++)
         sum += (array[i]-m)*(array[i]-m);
     
     return sum/len;
@@ -59,12 +61,13 @@ double var(int* array, int len)
  */
 int* sort(int* array, int len)
 {
+    int i;
     int temp;
     int swap = TRUE;
     
     while (swap) {
         swap = FALSE;
-        for (int i=0; i<len; i++) {
+        for (i=0; i<len; i++) {
             if (array[i] > array[i+1]) {
                 temp = array[i];
                 array[i] = array[i+1];

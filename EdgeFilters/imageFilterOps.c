@@ -92,6 +92,7 @@ const static int nagaoSize[9] = {9, 7, 7, 7, 7, 7, 7, 7, 7};
  */
 Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double w2)
 {
+    int i;
     if(!filterOp1 || !filterOp2 )
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
@@ -103,7 +104,7 @@ Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double 
     
     Filter* filter = newFilter(width,height);
     
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         filter->kernel[i] = w1*filterOp1->kernel[i] + w2*filterOp2->kernel[i];
     }
     
@@ -121,6 +122,7 @@ Filter *linearAddFilter(Filter* filterOp1, Filter* filterOp2, double w1, double 
  */
 int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
 {
+    int i;
     int randVal;
     
     if(!pgmIn)
@@ -147,7 +149,7 @@ int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
     int height = pgmIn->height;
     
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         randVal = random()%(2*range)-range;
         pgmOut->pixels[i] = pgmIn->pixels[i] + randVal;
     }
@@ -168,6 +170,8 @@ int addUniformNoisePGM(Pgm* pgmIn, Pgm* pgmOut, int range)
  */
 int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
 {
+    int i;
+    
     if(!pgmIn)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
@@ -184,7 +188,7 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
     int height = pgmIn->height;
     
     // Iterate over all pixels
-    for (int i = 0; i < width*height; i++) {
+    for (i = 0; i < width*height; i++) {
         if (drandom()>density) {
             pgmOut->pixels[i] = pgmIn->pixels[i];
         } else {
@@ -216,6 +220,7 @@ int addSaltPepperNoisePGM(Pgm* pgmIn, Pgm* pgmOut, double density)
  */
 int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
+    int k, l, il;
     int* pixels;
     int pixel;
     int ix = 0;
@@ -224,8 +229,8 @@ int medianKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY,
     pixels = calloc((2*spanX+1)*(2*spanY+1), sizeof(int));
     
     // Iterate over all filter pixels
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++)
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++)
             pixels[ix++] = pgmIn1->pixels[il+l];
     
     int nPixels = ix;
@@ -374,6 +379,7 @@ int gaussPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
  */
 int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int ic)
 {
+    int k, l, il, j;
     int pixels[9];
     int I[9];
     const double K = 255*1.5;
@@ -390,8 +396,8 @@ int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int
     int ix = 0;
     
     // Iterate over all filter pixels
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++) {
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++) {
             pixels[ix] = pgmIn1->pixels[il+l];
             Pi += pixels[ix++];
         }
@@ -413,7 +419,7 @@ int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int
     
     int Pik = 0;
     int Pij = 0;
-    for (int j=0; j<9; j++) {
+    for (j=0; j<9; j++) {
         Pij = I[mod((j-1),9)] + I[j] + I[mod((j+1),9)];
         if (Pij > Pik)
             Pik = Pij;
@@ -449,6 +455,7 @@ int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
  */
 int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
+    int k, l, il;
     const int *np = NULL;
     int pixelVals[9];
     int ix, in;
@@ -468,8 +475,8 @@ int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, 
         ix = 0;
         in = 0;
         // Iterate over all filter pixels
-        for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-            for (int l=-spanX; l <= spanX; l++, ix++) {
+        for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+            for (l=-spanX; l <= spanX; l++, ix++) {
                 if (np[ix] == 1) {
                     pixelVals[in] = pgmIn1->pixels[il+l]*np[ix];
                     in++;
@@ -524,6 +531,7 @@ const static int neighbors[] = {
  */
 int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int spanX, int spanY, int ic)
 {
+    int k,l, il;
     int pixels[9];
     int ix = 0;
     
@@ -535,8 +543,8 @@ int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int spanX, int s
     spanY = 1;
     
     // Copy the image pixels in a local pixels array
-    for (int k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
-        for (int l=-spanX; l <= spanX; l++) {
+    for (k=-spanY, il = ic-width*spanY; k <= spanY; k++, il += width)
+        for (l=-spanX; l <= spanX; l++) {
             pixels[ix++] = pgmMod->pixels[il+l];
         }
     
@@ -566,7 +574,7 @@ int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
     return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 3, 3, suppressionKernel);
 }
 
-/*! \fn int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
+/*! \fn int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, unsigned int phase)
  * \brief Filter the image \a pgmIn with two Sobel filters alogn the vertical and horizontal direction.
  *        Returns either the magnitute or the phase based on \a phase.
  *
@@ -577,7 +585,7 @@ int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
  * \param phase Returns the phase if set to 1. Otherwise it returns the magnitude.
  * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
-int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
+int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, unsigned int phase)
 {
     if(!pgmIn)
     {
@@ -631,7 +639,7 @@ int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
  * \param phase Returns the phase if set to 1. Otherwise it returns the magnitude.
  * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
-int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
+int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, unsigned int phase)
 {
     if(!pgmIn)
     {
@@ -727,7 +735,8 @@ int dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
  * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
 int cedPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim, int threshold_low, int threshold_high)
-{    
+{
+    int i;
     Pgm* imgOutX = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     Pgm* imgOutY = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
     Pgm* imgOutMod = newPGM(pgmIn->width, pgmIn->height, pgmIn->max_val);
@@ -767,7 +776,7 @@ int cedPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim, int threshold_low, in
     
     // Find 8-connected pixels in imgNL by a repeated search
 
-    for (int i=0; (i<50) && change; i++) {
+    for (i=0; (i<50) && change; i++) {
         connectivityPGM(imgNH, imgNL, pgmOut);
         
         change = comparePGM(imgNH, pgmOut);

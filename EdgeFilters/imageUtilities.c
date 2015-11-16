@@ -320,6 +320,8 @@ int copyPGM(Pgm* pgmIn, Pgm* pgmOut)
  */
 int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
+    int i;
+    
     if(!pgmIn || !pgmOut)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
@@ -344,7 +346,7 @@ int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
         }
     }
     
-    for(int i = 0; i<width*height; i++) {
+    for(i = 0; i<width*height; i++) {
         pgmOut->pixels[i] = (int)255*(pgmIn->pixels[i] - min_val ) / (top_val-min_val);
     }
     
