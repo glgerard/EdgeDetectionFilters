@@ -2,8 +2,8 @@ SHELL=/bin/sh
 
 #CC=gcc
 CC=/opt/local/bin/x86_64-apple-darwin15-gcc-4.9.3
-CFLAGS=-c -std=c99 -Wall
-LDFLAGS=
+CFLAGS=-c -Wall
+LDFLAGS=-lm
 SOURCES=main.c imageFilters.c imageBasicOps.c imageUtilities.c helperFunctions.c imageFilterOps.c imageContours.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=filterPGM
@@ -14,7 +14,7 @@ EXECUTABLE=filterPGM
 all: $(SOURCES) $(EXECUTABLE)
     
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 install: $(EXECUTABLE)
 	[ -d $(HOME)/bin ] || mkdir $(HOME)/bin

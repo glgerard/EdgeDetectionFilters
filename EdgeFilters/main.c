@@ -70,7 +70,7 @@ int main(int argc, char** argv)
         switch (c) {
             case 'f':
                 filename = basename(optarg);
-                strlcpy(command, filename, sizeof(command));
+                strncpy(command, filename, sizeof(command));
                 removeExt(command);
                 fp = fopen(optarg, "rb");
                 if (fp == NULL) {
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
                 break;
             case 'o':
                 oflag = TRUE;
-                strlcpy(outputFile, optarg, sizeof(outputFile));
+                strncpy(outputFile, optarg, sizeof(outputFile));
                 break;
             default:
                 break;
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
         exit(1);
     }
     
-    strlcpy(inputFile, argv[0], sizeof(inputFile));
+    strncpy(inputFile, argv[0], sizeof(inputFile));
     Pgm *imgIn = readPGM(inputFile);
     
     if(imgIn == NULL)
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
     srandom(357);
     
     if (oflag == FALSE) {
-        strlcpy(outputFile, argv[0], sizeof(outputFile));
+        strncpy(outputFile, argv[0], sizeof(outputFile));
         removeExt(outputFile);
     }
     

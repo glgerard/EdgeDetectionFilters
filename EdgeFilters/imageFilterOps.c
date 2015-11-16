@@ -456,6 +456,7 @@ int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
 int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
 {
     int k, l, il;
+    int n;
     const int *np = NULL;
     int pixelVals[9];
     int ix, in;
@@ -470,7 +471,7 @@ int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, 
     int width = pgmIn1->width;
     
     // Iterates over all Nagao matrixes
-    for (int n=0; n<9; n++) {
+    for (n=0; n<9; n++) {
         np = nagao[n];
         ix = 0;
         in = 0;
