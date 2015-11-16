@@ -16,11 +16,11 @@ fi
 EXT=pgm
 IMGNAME=`basename $FILENAME .$EXT`
 
-FILTER_DIR=../filters
+BIN_DIR=${HOME}/bin
 
-BINDIR=${HOME}/bin
+FILTER_DIR=${BIN_DIR}/flts
 
-CMDLINE=${BINDIR}/filterPGM
+CMDLINE=${BIN_DIR}/filterPGM
 
 $CMDLINE -f ${FILTER_DIR}/noiseu.flt $FILENAME
 

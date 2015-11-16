@@ -1,7 +1,8 @@
 SHELL=/bin/sh
 
-CC=gcc
-CFLAGS=-c -Wall
+#CC=gcc
+CC=/opt/local/bin/x86_64-apple-darwin15-gcc-4.9.3
+CFLAGS=-c -std=c99 -Wall
 LDFLAGS=
 SOURCES=main.c imageFilters.c imageBasicOps.c imageUtilities.c helperFunctions.c imageFilterOps.c imageContours.c
 OBJECTS=$(SOURCES:.c=.o)
@@ -16,9 +17,11 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 install: $(EXECUTABLE)
+	[ -d $(HOME)/bin ] || mkdir $(HOME)/bin
+	[ -d $(HOME)/bin/flts ] || mkdir $(HOME)/bin/flts
 	cp $(EXECUTABLE) $(HOME)/bin
 	cp run.sh $(HOME)/bin/runFilters.sh
-
+	cp filters/*.flt $(HOME)/bin/flts
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
 
