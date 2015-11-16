@@ -433,7 +433,7 @@ int op39Kernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int dimX, int dimY, int
  */
 int op39PGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 0, 0, op39Kernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 3, 3, op39Kernel);
 }
 
 /*! \fn nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, int ic)
@@ -499,7 +499,7 @@ int nagaoKernel(Pgm* pgmIn1, Pgm* pgmIn2, double* kernel, int spanX, int spanY, 
  */
 int nagaoPGM(Pgm *pgmIn, Pgm* pgmOut)
 {
-    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 0, 0, nagaoKernel);
+    return fapplyPGM(pgmIn, NULL, pgmOut, NULL, 5, 5, nagaoKernel);
 }
 
 // These are the pairs of neighbors in a 3x3 array to confront with
@@ -563,7 +563,7 @@ int suppressionKernel(Pgm *pgmMod, Pgm* pgmPhi, double* kernel, int spanX, int s
  */
 int suppressionPGM(Pgm *pgmMod, Pgm *pgmPhi, Pgm *pgmOut)
 {
-    return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 0, 0, suppressionKernel);
+    return fapplyPGM(pgmMod, pgmPhi, pgmOut, NULL, 3, 3, suppressionKernel);
 }
 
 /*! \fn int sobelPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
@@ -675,15 +675,14 @@ int prewittPGM(Pgm* pgmIn, Pgm* pgmOut, uint8_t phase)
 }
 
 /*! \fn dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)
- * \brief Filter the image \a pgmIn with two Prewitt filters alogn the vertical and horizontal direction.
- *        Returns either the magnitute or the phase based on \a phase.
+ * \brief Filter the image \a pgmIn with a DoG filter. Store the result in \a pgmOut.
  *
- * Apply the vertical and horizontal Prewitt filters and returns the magnitute if \a phase is 0
- * or the phase if \a phase is 1.
+ * Apply a DoG filter to \a pgmIn. Refer to \link DoGFilter() DoGFilter() function \endlink for further information.
  * \param pgmIn Pointer to the input PGM image structure.
  * \param pgmOut Pointer to the output PGM image structure.
- * \param sigma The external sigma of the DoG filter. The internal sigma is set to \a sigma / 1.66 .
- * \param dim The rows and columns of the DoG filter. If set to 0 then it will be the smallest odd next to 6 \a sigma.
+ * \param sigma The sigma of the external Gaussian.
+ * \param dim The number of rows and columns of the filter. If it is set to 0 then the dimension
+ *        is the smallest odd number next to 6 \a sigma.
  * \return 0 on success, -1 if either pgmIn or pgmOut are NULL.
  */
 int dogPGM(Pgm* pgmIn, Pgm* pgmOut, double sigma, int dim)

@@ -32,6 +32,7 @@
 /* Begin PBXFileReference section */
 		3611C0321BF60CAA0070B2E2 /* imageContours.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageContours.c; sourceTree = "<group>"; };
 		3611C0331BF60CAA0070B2E2 /* imageContours.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imageContours.h; sourceTree = "<group>"; };
+		367332891BFA2033006F8988 /* run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
 		36AB89E91BE4DD61003C0E5B /* EdgeFilters */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EdgeFilters; sourceTree = BUILT_PRODUCTS_DIR; };
 		36AB89F31BE4DDDB003C0E5B /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		36AB89F51BE4DDFB003C0E5B /* imageFilters.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imageFilters.c; sourceTree = "<group>"; };
@@ -101,6 +102,7 @@
 				36AB8A061BEE47A8003C0E5B /* imageFilterOps.h */,
 				3611C0321BF60CAA0070B2E2 /* imageContours.c */,
 				3611C0331BF60CAA0070B2E2 /* imageContours.h */,
+				367332891BFA2033006F8988 /* run.sh */,
 			);
 			path = EdgeFilters;
 			sourceTree = "<group>";
