@@ -55,7 +55,7 @@ void freeFilter(Filter** filter)
  */
 void printFilter(Filter* filter)
 {
-    int i;
+    int i, j;
     int width = filter->width;
     int height = filter->height;
     int il=0;
@@ -67,7 +67,7 @@ void printFilter(Filter* filter)
     
     for (i=0; i<height; i++) {
         printf("[");
-        for (int j=0; j<width; j++) {
+        for (j=0; j<width; j++) {
             printf("%f ",filter->kernel[il++]);
         }
         printf("]\n");

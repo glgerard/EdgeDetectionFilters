@@ -215,14 +215,15 @@ int writePGM(Pgm* pgm, char* filename)
  * \return 0 on success. -1 if no Pgm structure pointer is provided.
  */
 int invertPGM(Pgm* pgmIn, Pgm* pgmOut)
-{	
+{
+    int i, inv;
+    
 	if(!pgmIn || !pgmOut)
 	{
 		fprintf(stderr, "Error! No input data. Please Check.\n");
 		return -1;
 	}
 
-	int i, inv;
 	int max = pgmIn->max_val;
 	int width = pgmIn->width;
 	int height = pgmIn->height;
@@ -339,7 +340,7 @@ int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     // find the min and max values
     int min_val = histogram->min_val;
 
-    for (int i = histogram->size-1; i > 0; i--) {
+    for (i = histogram->size-1; i > 0; i--) {
         if (histogram->channels[i] > 0) {
             top_val = i+min_val;
             break;
@@ -365,6 +366,7 @@ int normalizePGM(Pgm* pgmIn, Pgm* pgmOut)
  */
 int equalizePGM(Pgm* pgmIn, Pgm* pgmOut)
 {
+    int s, i;
     if(!pgmIn || !pgmOut)
     {
         fprintf(stderr, "Error! No input data. Please Check.\n");
@@ -380,12 +382,12 @@ int equalizePGM(Pgm* pgmIn, Pgm* pgmOut)
     Histogram* histogram = histogramPGM(pgmIn);
 
     int tot = 0;
-    for (int s=0; s<histogram->size; s++) {
+    for (s=0; s<histogram->size; s++) {
         tot += histogram->channels[s];
     }
-    for(int i = 0; i<width*height; i++) {
+    for(i = 0; i<width*height; i++) {
         sum = 0;
-        for (int s=0; s <= pgmIn->pixels[i]; s++) {
+        for (s=0; s <= pgmIn->pixels[i]; s++) {
             sum += histogram->channels[s];
         }
         pgmOut->pixels[i] = (int) 255*sum/tot;
